@@ -1,0 +1,417 @@
+/* BUDDi look for Sage Mode. Decision: tokens and neobrutalist primitives COPIED from
+   code/agentcamp-buddy/apps/web/src/index.css (never imported: separate repo, no
+   Tailwind here). Mobile first; laptop width caps the column for a call demo. */
+:root {
+  --color-ink: #0a0a0a;
+  --color-charcoal: #3a3a3a;
+  --color-paper: #fff9f5;
+  --color-paper-dark: #fff0e8;
+  --color-panel: #ffffff;
+  --color-mute: #3a3a3a;
+  --color-magenta: #c4177a;
+  --color-violet: #7c3aed;
+  --color-gold: #ffb800;
+  --color-accent: #c4177a;
+  --color-good: #7c3aed;
+  --color-warn: #ffb800;
+  --color-success: #15803d;
+  --color-danger: #dc2626;
+  --color-disabled: #d6d2cc;
+  accent-color: var(--color-magenta);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-weight: 500;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  background-image: radial-gradient(var(--color-paper-dark) 1.5px, transparent 1.5px);
+  background-size: 22px 22px;
+}
+
+h1,
+h2,
+h3 {
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+h1 {
+  font-size: 1.6rem;
+  font-weight: 900;
+  margin: 0.2rem 0 0.8rem;
+}
+h1:focus {
+  outline: none;
+}
+h2 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin: 1.2rem 0 0.4rem;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-ink);
+  outline-offset: 2px;
+}
+::selection {
+  background: var(--color-gold);
+  color: var(--color-ink);
+}
+
+button,
+summary,
+a[href],
+label[for] {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* --- Neobrutalist primitives (hard borders + solid offset shadows) --- */
+.nb {
+  border: 3px solid var(--color-ink);
+  box-shadow: 5px 5px 0 0 var(--color-ink);
+}
+.nb-sm {
+  border: 2px solid var(--color-ink);
+  box-shadow: 3px 3px 0 0 var(--color-ink);
+}
+.nb-press {
+  transition:
+    transform 0.05s ease,
+    box-shadow 0.05s ease;
+}
+.nb-press:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: 6px 6px 0 0 var(--color-ink);
+}
+.nb-press:active:not(:disabled) {
+  transform: translate(3px, 3px);
+  box-shadow: 2px 2px 0 0 var(--color-ink);
+}
+.kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 800;
+  font-size: 0.7rem;
+}
+.reading {
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* --- layout --- */
+#header,
+#main {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+#main {
+  padding-bottom: 3rem;
+}
+.mock-banner {
+  margin: 0.75rem 0 0;
+  padding: 0.4rem 0.75rem;
+  background: var(--color-gold);
+  border: 2px solid var(--color-ink);
+  font-weight: 800;
+  font-size: 0.8rem;
+}
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 0;
+}
+.bar-right {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.logo {
+  display: inline-grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  background: var(--color-magenta);
+  color: var(--color-paper);
+  font-weight: 900;
+  font-size: 1.2rem;
+}
+.chip {
+  padding: 0.3rem 0.6rem;
+  background: var(--color-panel);
+  font-weight: 800;
+  font-size: 0.8rem;
+}
+.panel {
+  background: var(--color-panel);
+  padding: 1.25rem;
+}
+.step {
+  color: var(--color-magenta);
+  margin: 0;
+}
+.muted {
+  color: var(--color-mute);
+}
+.small {
+  font-size: 0.8rem;
+}
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+/* --- controls --- */
+.btn {
+  font: inherit;
+  font-weight: 800;
+  padding: 0.65rem 1.1rem;
+  min-height: 44px;
+  background: var(--color-panel);
+  color: var(--color-ink);
+}
+.btn-primary {
+  background: var(--color-magenta);
+  color: #fff;
+}
+.btn-danger {
+  background: var(--color-danger);
+  color: #fff;
+}
+.btn-plain {
+  background: var(--color-panel);
+}
+.btn:disabled,
+.question:disabled {
+  background: var(--color-disabled);
+  color: var(--color-charcoal);
+  box-shadow: none;
+}
+main .btn {
+  margin-top: 0.75rem;
+}
+input:not([type="checkbox"]) {
+  font: inherit;
+  font-size: 1rem;
+  padding: 0.6rem 0.7rem;
+  border: 2px solid var(--color-ink);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  width: 100%;
+}
+label {
+  font-weight: 800;
+}
+.check {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  padding: 0.75rem;
+  margin-top: 1rem;
+  background: var(--color-paper-dark);
+}
+.check input {
+  width: 1.2rem;
+  height: 1.2rem;
+  margin-top: 0.1rem;
+  flex: none;
+}
+.error-text {
+  color: var(--color-danger);
+  font-weight: 700;
+  min-height: 1em;
+  margin: 0.25rem 0;
+}
+.notice {
+  background: var(--color-gold);
+  padding: 0.5rem 0.75rem;
+  font-weight: 700;
+}
+.delete-voice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.delete-voice .btn {
+  padding: 0.35rem 0.7rem;
+  min-height: 36px;
+  font-size: 0.8rem;
+}
+.confirm-text {
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+/* --- content --- */
+.prose p {
+  margin: 0.5rem 0;
+}
+.prose ul,
+.prose ol {
+  margin: 0.5rem 0;
+  padding-left: 1.2rem;
+}
+.script {
+  background: var(--color-paper-dark);
+  padding: 0.75rem 1rem;
+  max-height: 22rem;
+  overflow-y: auto;
+}
+.recorder {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+}
+.timer {
+  font-size: 2rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+}
+.timer.live::before {
+  content: "";
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  margin-right: 0.5rem;
+  background: var(--color-danger);
+  border: 2px solid var(--color-ink);
+  vertical-align: middle;
+}
+audio {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.questions {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+.question {
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  padding: 0.9rem 1rem;
+  background: var(--color-panel);
+  color: var(--color-ink);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+.badge {
+  background: var(--color-violet);
+  color: #fff;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.question-text {
+  font-size: 1.35rem;
+}
+.live {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1rem;
+  background: var(--color-paper-dark);
+}
+.status {
+  margin: 0;
+  font-weight: 800;
+  font-size: 1.05rem;
+}
+.pulse {
+  flex: none;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: 3px solid var(--color-ink);
+  background: var(--color-disabled);
+}
+.pulse[data-state="speaking"] {
+  background: var(--color-violet);
+  animation: beat 0.9s ease-in-out infinite;
+}
+.pulse[data-state="listening"] {
+  background: var(--color-magenta);
+}
+.pulse[data-state="building"],
+.pulse[data-state="connecting"] {
+  background: var(--color-gold);
+  animation: spin 1.4s linear infinite;
+}
+@keyframes beat {
+  50% {
+    transform: scale(0.8);
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pulse {
+    animation: none !important;
+  }
+}
+
+.best-self {
+  font-size: 1.1rem;
+  border-left: 5px solid var(--color-magenta);
+  padding-left: 0.8rem;
+}
+.said {
+  margin-top: 1rem;
+  padding: 0.6rem 0.8rem;
+  background: var(--color-paper-dark);
+}
+.said summary {
+  font-weight: 800;
+}
+
+@media (min-width: 640px) {
+  .panel {
+    padding: 1.75rem 2rem;
+  }
+  h1 {
+    font-size: 2rem;
+  }
+}
