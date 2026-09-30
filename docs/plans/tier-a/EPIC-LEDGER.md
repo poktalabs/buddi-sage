@@ -1,0 +1,38 @@
+# EPIC buddi-sage Tier A: ledger
+
+Append-only run record for `/ultracode-epic`. The contract below is frozen; it may only change by an `AUTO` → `HUMAN` downgrade or by filling a named blank. Anything else is a new contract and needs Mel.
+
+## Contract: FROZEN 2026-09-29 (Mel: "go")
+
+| Gate | Decision | Mechanical condition | Evidence command |
+|---|---|---|---|
+| 0 → 1 | `AUTO` | `pnpm typecheck` exits 0 AND `pnpm test` reports 5 passed, 0 failed, 1 test file AND `git diff --name-only 781345a..tier-a` lists exactly the Wave 0 files (`src/shared/api.ts`, `src/worker/env.ts`, `src/raw.d.ts`, `content/consent.md`, `content/reading-script.md`, `content/rewrite-prompt.md`, `content/sage-system-prompt.md`, `content/sage-first-message.md`, plus `docs/plans/tier-a/*`) | `cd code/buddi-sage && pnpm typecheck; echo $?; pnpm test 2>&1 \| tail -5; git diff --name-only 781345a..tier-a` |
+| 1 → 2 | `HUMAN` | n/a (content approval, live keys, probe authorisation) | preconditions in IMPLEMENTATION-PLAN "Gate 1 → 2" |
+| 2 → 3 | `HUMAN` | n/a (production and spend) | preconditions in IMPLEMENTATION-PLAN "Gate 2 → 3" |
+| 3 → done | `HUMAN` | terminal; Mel runs the live Round | Wave 3 step 8 record |
+
+Named blanks (filled at gate 1 → 2, may only narrow): `TTS_MODEL` (`eleven_v4` if listed with `can_do_text_to_speech`, else `eleven_multilingual_v2`); `UPLOAD_FORMAT` (`webm` or `transcode`).
+
+## Circuit breakers
+
+Skill-level (end the epic, override any `AUTO`): sensitive-data or secret hit in any diff or commit message; dependency or lockfile change by any agent; an agent returns `BLOCKED` or `NEEDS_CONTEXT`; test count fell in any file; a merge broke the build (after one redispatch); undeclared lane crossing or two agents on one file; provider spend, deployment, production access or regulated data beyond what the entry point pre-authorises.
+
+Project's own list, verbatim from ENTRY-POINT.md "Where you stop and ask Mel":
+
+- Missing keys. Mel puts the ElevenLabs API key and a dedicated Nebius key in `code/buddi-sage/.dev.vars`. No live call before that. (As of 2026-09-29 `.dev.vars` does not exist.)
+- Content approval: Consent text, reading script, rewrite prompt, Sage system prompt and first message, before any of it goes live in the agent or the deployed page.
+- Any push to a remote or any PR. The repo has no remote. Never without Mel's explicit go.
+- Deleting anything in the ElevenLabs workspace. The MCP login can delete everything, including Mel's own voices and other agents.
+- Spending beyond the plan: Creator includes 75 agent minutes per month. Keep test calls short; no background or looping live calls.
+- Anything touching production: `wrangler d1 create`, `wrangler secret put`, `wrangler deploy`, remote migrations, creating or updating the ElevenLabs agent.
+- A locked decision that looks wrong. Report it; do not re-decide it.
+
+## Pre-flight: 2026-09-29
+
+Gate 0 → 1 (the only `AUTO` row): crossable today. On `main` @ `781345a`: `pnpm typecheck` exit 0; `pnpm test`: `Test Files 1 passed (1)`, `Tests 5 passed (5)`. The evidence command needs no keys, network or production access.
+
+## Baseline
+
+`main` @ `781345a`. Tests: `test/guards.test.ts` 5 passed; 1 test file total. Typecheck clean. `.dev.vars` absent.
+
+## Run record
