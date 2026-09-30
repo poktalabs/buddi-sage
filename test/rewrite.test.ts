@@ -45,7 +45,7 @@ describe("the prompt file", () => {
   });
 
   it("replaceEmDashes turns each em-dash into a comma and a space", () => {
-    expect(replaceEmDashes("We shipped it — then we fixed it—fast")).toBe("We shipped it, then we fixed it, fast");
+    expect(replaceEmDashes("We shipped it \u2014 then we fixed it\u2014fast")).toBe("We shipped it, then we fixed it, fast");
   });
 });
 
@@ -110,17 +110,17 @@ describe("bestSelfAnswer", () => {
   });
 
   it("treats empty output (or only an em-dash) as a failed attempt", async () => {
-    const { chatText } = fakeChat(["", " — "]);
+    const { chatText } = fakeChat(["", " \u2014 "]);
     const res = await bestSelfAnswer({ question: QUESTION, answer: ANSWER }, deps(chatText));
     expect(res.status).toBe("fallback");
   });
 
   it("replaces em-dashes in model output before the guard check", async () => {
-    const { chatText } = fakeChat(["We built a support bot — in about three months — and I wrote the retrieval part."]);
+    const { chatText } = fakeChat(["We built a support bot \u2014 in about three months \u2014 and I wrote the retrieval part."]);
     const res = await bestSelfAnswer({ question: QUESTION, answer: ANSWER }, deps(chatText));
     expect(res.status).toBe("replayed");
     expect(res.text).toBe("We built a support bot, in about three months, and I wrote the retrieval part.");
-    expect(res.text).not.toContain("—");
+    expect(res.text).not.toContain("\u2014");
   });
 
   it("the fallback text adds nothing: every word was said, and the guard rules pass", async () => {

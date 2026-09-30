@@ -51,7 +51,7 @@ export function fill(template: string, vars: Record<string, string>): string {
 
 /** Every em-dash (with the spaces around it) becomes a comma and a space. */
 export function replaceEmDashes(text: string): string {
-  return text.replace(/\s*—\s*/g, ", ").trim();
+  return text.replace(/\s*\u2014\s*/g, ", ").trim();
 }
 
 export async function bestSelfAnswer(input: { question: string; answer: string }, deps: RewriteDeps): Promise<RewriteResult> {

@@ -5,7 +5,7 @@
 // request; running out answers 504 and leaves the Round started so the page can retry once. A
 // Round that is no longer started answers 409, so a retry or a second tab never spends a
 // second rewrite or writes a second Replay. audio streams the TTS body straight through:
-// buffering or base64 would blow the 10 ms CPU budget.
+// buffering or re-encoding the audio would blow the 10 ms CPU budget.
 import type { ReplayResponse } from "../../shared/api";
 import { findQuestion } from "../../shared/questions";
 import { failRound, finishRound, getCode, getRound, setConversationId } from "../db";
