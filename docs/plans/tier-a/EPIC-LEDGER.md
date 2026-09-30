@@ -136,3 +136,7 @@ Contract row: "`HUMAN` | n/a (production and spend) | preconditions in IMPLEMENT
 ### Wave 3 step 2: D1 (2026-09-30)
 
 Mel: "go". `pnpm wrangler d1 create buddi-sage`: created in region WNAM, id `6b099f7f-347e-481b-8966-1d9126be924a` (written into `wrangler.jsonc`; binding stays `DB`). `pnpm db:migrate:remote`: `0001_codes_and_rounds.sql` and `0002_round_texts.sql` both applied.
+
+### Wave 3 step 3: secrets (2026-09-30)
+
+Mel: "go" to reusing the `.dev.vars` values (deviation from the plan's fresh `LLM_PROXY_SECRET`: the local value never left gitignored files, and steps 5 and 9 need it where `.dev.vars` is append-only). A node script read the five keys from `.dev.vars` and piped JSON to `pnpm wrangler secret bulk`; no value printed. Wrangler created the Worker "buddi-sage" (no code yet) to hold them; 5 secrets created. `wrangler secret list` names: ELEVENLABS_API_KEY, NEBIUS_API_KEY, LLM_PROXY_SECRET, SESSION_SECRET, ADMIN_SECRET.
