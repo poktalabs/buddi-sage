@@ -36,3 +36,33 @@ Gate 0 → 1 (the only `AUTO` row): crossable today. On `main` @ `781345a`: `pnp
 `main` @ `781345a`. Tests: `test/guards.test.ts` 5 passed; 1 test file total. Typecheck clean. `.dev.vars` absent.
 
 ## Run record
+
+### Wave 0: 2026-09-29 21:16 (orchestrator contract commit, no agents)
+
+Branch `tier-a` cut from `main` @ `781345a`. Commit `7a6a726` (author `19479678+troopdegen@users.noreply.github.com`): `src/shared/api.ts`, `src/worker/env.ts`, `src/raw.d.ts` verbatim from IMPLEMENTATION-PLAN "Wave 0"; five `content/*.md` placeholders; plan docs.
+
+### Gate 0 → 1: CROSSED
+
+Contract row: "`AUTO` if `pnpm typecheck` exits 0 AND `pnpm test` reports 5 passed, 0 failed, 1 test file AND `git diff --name-only 781345a..tier-a` lists exactly the Wave 0 files".
+
+Evidence, run by the driver after the commit:
+
+```
+typecheck exit=0
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+git diff --name-only 781345a..tier-a:
+content/consent.md
+content/reading-script.md
+content/rewrite-prompt.md
+content/sage-first-message.md
+content/sage-system-prompt.md
+docs/plans/tier-a/ENTRY-POINT.md
+docs/plans/tier-a/EPIC-LEDGER.md
+docs/plans/tier-a/IMPLEMENTATION-PLAN.md
+src/raw.d.ts
+src/shared/api.ts
+src/worker/env.ts
+```
+
+Circuit breakers checked: no `package.json`/lockfile change (not in diff); no secrets (files are types, placeholders and plan prose; `.dev.vars` absent); no agents ran; no spend, deploy or ElevenLabs change. Integration state: `tier-a` @ `7a6a726` plus this ledger append, local only, no remote.
