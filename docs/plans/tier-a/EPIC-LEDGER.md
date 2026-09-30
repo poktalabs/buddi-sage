@@ -104,3 +104,7 @@ Mel recorded the reading script in mock mode (about 90 s; 226 words reads longer
 ### Sage voice set (2026-09-30)
 
 Jen `QLAlOeRuLwKX0skeTR7R` could not be found by Mel in the app or by the driver in `GET /v1/shared-voices` (search "Jen" and the full name); treated as unavailable. Mel picked a replacement from the Voice Library: "Jen - Young, Calm & Friendly" `cwHwYupmHH3pk6RciNyG` (professional clone, English with a German accent, en-GB; `rate` 1 so standard credit cost, `notice_period` 730 days, `is_added_by_user` true). `agents_update` on `<agent-id>`: read back shows `tts.voice_id` = `cwHwYupmHH3pk6RciNyG`, prompt, first message, tool, auth and limits unchanged, all overrides still false; version `agtvrsn_5201m3skt2z9ea89c3ap14tgheyc`. All gate 1 → 2 items from WAVE-1-REPORT section 4 are now closed; the gate is `HUMAN` and waits for Mel's go.
+
+### Sage voice changed again (2026-09-30)
+
+Mel: "then use this one: IDHS58OMlK9jZvRdhEVy". Library voice "Jennifer - AI Explainer" (professional clone, American English en-US; `rate` 1, `notice_period` 180 days). Driver added it to My Voices via `POST /v1/voices/add/{public_owner_id}/IDHS58OMlK9jZvRdhEVy` -> 200 (name "Sage - Jennifer AI Explainer"; `GET /v1/voices/IDHS58OMlK9jZvRdhEVy` -> 200). `agents_update`: read back `tts.voice_id` = `IDHS58OMlK9jZvRdhEVy`, everything else unchanged, overrides still false; version `agtvrsn_8201m3sky39xf0wrm2b0sc08aynx`. `cwHwYupmHH3pk6RciNyG` stays in My Voices, unused (removing it is Mel's call). Gate 1 → 2 still waits for Mel's go.
