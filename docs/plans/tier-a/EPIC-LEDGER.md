@@ -92,3 +92,7 @@ First Pi run (read tool, all five files) killed at the 30-minute background limi
 ### Content approved and applied: 2026-09-30 (gate still HELD)
 
 Mel: "apply". Commit `cec4535` writes the reviewed versions into `content/` with the two driver changes Mel accepted (Sage step 1 keeps "already asked in your first message"; first message keeps a one-line Round format). Typecheck 0, tests 18 files / 184 after the change. Test agent updated to the approved prompt and first message (version `agtvrsn_8501m3sd2c0ce4zsq73p380ah1py`); Jen still `voice_not_found`, voice unchanged. `AGENT_ID` for the test agent appended to `.dev.vars` (append only, no other line touched). Remaining for gate 1 → 2: `SESSION_SECRET` and `ADMIN_SECRET` (Mel), the probe (Mel records, driver runs), Jen in My Voices (Mel).
+
+### Named blank filled: TTS_MODEL (2026-09-30)
+
+Correction to the entry above: `SESSION_SECRET` and `ADMIN_SECRET` were already set by Mel when checked (`grep -cE '^KEY=.+'` = 1 for all six values). Probe `node evals/probe-2026-09-30/probe.mjs models`: `GET /v1/models -> 200`; `eleven_v4 can_do_text_to_speech=true` (also v4_turbo, v3, v3_conversational, multilingual_v2, flash_v2_5, turbo_v2_5, turbo_v2, flash_v2). Blank filled per the contract rule (`eleven_v4` if listed with TTS, else `eleven_multilingual_v2`): `wrangler.jsonc` `TTS_MODEL` = `eleven_v4`. `UPLOAD_FORMAT` still open (needs Mel's recording for `probe.mjs upload`).
