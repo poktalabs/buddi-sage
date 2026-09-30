@@ -78,3 +78,9 @@ Four agents returned `DONE_WITH_CONCERNS`. The driver re-ran GATE-1-CHECKLIST on
 ### Gate 1 → 2: HELD
 
 Contract row: "`HUMAN` | n/a (content approval, live keys, probe authorisation)". Circuit breakers checked: none fired (no secret hit, no dependency change, no BLOCKED/NEEDS_CONTEXT, no test count fell, no build broke, no undeclared crossing, no spend or deploy). Held for Mel's five decisions listed in WAVE-1-REPORT section 4. Integration state: `tier-a` @ `b59ffa6` plus report/ledger commit, local only, nothing pushed.
+
+### Gate 1 → 2: Mel's answers, 2026-09-29 (gate still HELD)
+
+Mel's reply to the five decisions: (1) content: review it first with a Pi coding agent on `nebius/deepseek-ai/DeepSeek-V4-Pro-0813` under a taste-and-efficiency reviewer persona (`content-review/REVIEWER-PERSONA.md`, brief `content-review/REVIEW-BRIEF.md`, run read-only with `-t read`); approval follows the review. (2) Keys: Mel fills `code/buddi-sage/.dev.vars`. (3) Probe: Mel records and tests. (4) Test agent: "use it/do it". (5) Question wording: accepted as is.
+
+Decision 4 executed: client tool `save_answer` `tool_8901m3r84ac3emfsg8g1vyrtwed7` (client, expects_response true, pre_tool_speech off, `question_id` bound to the `question_id` dynamic variable). Agent `<agent-id>` "Sage (Tier A test, built-in LLM)": draft A3 prompt and first message, tool attached, `enable_auth` true, `max_duration_seconds` 300, `agent_concurrency_limit` 1, `daily_limit` 20, `bursting_enabled` false, every override false (the default `text_only` override was switched off), built-in LLM `qwen35-397b-a17b`. Verified by reading the agent back. Not done: voice Jen `QLAlOeRuLwKX0skeTR7R` returns `voice_not_found`; it must be added to My Voices first (a workspace voice slot, Mel's click). Process note: `agents_create` with a `body` silently dropped the top-level prompt, first message, voice, name and tags; the fix was one `agents_update` with everything inside `body`.
