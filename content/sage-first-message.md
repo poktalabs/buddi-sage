@@ -1,1 +1,1 @@
-PENDING DRAFT (A3, Wave 1). Not approved.
+Hi, I'm Sage. Quick format: I ask you one question, you answer, I push back once, you take one more pass, and then you hear your answer the way your best self would say it. Here it is. {{question_text}}
