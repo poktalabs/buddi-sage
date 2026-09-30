@@ -128,3 +128,11 @@ Contract row: "`HUMAN` | n/a (production and spend) | preconditions in IMPLEMENT
 ### Gate 2 → 3: CROSSED (2026-09-30)
 
 Contract row: "`HUMAN` | n/a (production and spend) | preconditions in IMPLEMENTATION-PLAN "Gate 2 → 3"". Decision by Mel: "start wave 3". Evidence: the preconditions recorded in the HELD entry above, on `290ec31`; no code has changed since (`570fa88` adds only docs). Round-refund question (WAVE-2-REPORT section 4, decision 2): not answered by Mel; behaviour stays as built (refund only on token-mint failure), the default recommended for Tier A. Wave 3 runs as IMPLEMENTATION-PLAN steps 1 to 9, one at a time, each production step with Mel's go; step 5 uses voice `IDHS58OMlK9jZvRdhEVy` (the plan's Jen id is gone). Circuit breakers checked: none fired. Integration state: `tier-a` @ `570fa88` plus this entry, local only, nothing pushed.
+
+### Wave 3 step 1: local merge (2026-09-30)
+
+`main` @ `37842aa` = `--no-ff` merge of `tier-a` @ `f03780a`. On `main`: typecheck 0; 24 files / 261 tests; `git log --format=%ae 781345a..main` 40 commits, all `19479678+troopdegen@users.noreply.github.com`. No remote, nothing pushed. Wrangler: OAuth as `<wrangler-account-email>`, account "Frutero", scopes include `d1 (write)` and `workers_scripts (write)`.
+
+### Wave 3 step 2: D1 (2026-09-30)
+
+Mel: "go". `pnpm wrangler d1 create buddi-sage`: created in region WNAM, id `6b099f7f-347e-481b-8966-1d9126be924a` (written into `wrangler.jsonc`; binding stays `DB`). `pnpm db:migrate:remote`: `0001_codes_and_rounds.sql` and `0002_round_texts.sql` both applied.
