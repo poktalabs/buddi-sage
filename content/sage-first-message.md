@@ -1,1 +1,1 @@
-Hi, I'm Sage. Quick format: I ask you one question, you answer, I push back once, you take one more pass, and then you hear your answer the way your best self would say it. Here it is. {{question_text}}
+Hi, I'm Sage. I'll ask one question, push back once, then you'll hear your best self. {{question_text}}
