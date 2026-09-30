@@ -32,3 +32,13 @@ See WAVE-1-REPORT section 4: (1) approve the five content files, including the a
 ## 7. What the contract got wrong
 
 Nothing yet. One process note for the next contract: `worktree.sh create --branch tier-a/<x>` fails while a branch named `tier-a` exists (git ref namespace clash), so agent branches use `wave<N>/<lane>`. Name the integration branch so it cannot prefix agent branches.
+
+# Stop 2: gate 2 → 3 held (2026-09-30)
+
+1. **Where it got to.** Waves 0, 1, 2 run and merged. Wave 3 (deploy and the live Round) not run: gate 2 → 3 is `HUMAN` (production and spend).
+2. **Gate decisions since stop 1.** 1 → 2 CROSSED on Mel's "start wave 2" after all five items closed (evidence: 18 files / 184 tests, six `.dev.vars` values present, both named blanks filled; ledger). 2 → 3 HELD (evidence: 24 files / 261 tests, build 0, boot smoke, key grep 0, authors clean; ledger).
+3. **Autonomy audit.** No `AUTO` crossing since stop 1; both gates were `HUMAN`.
+4. **Circuit breakers.** None fired in Wave 2; checked per branch and after each merge (WAVE-2-REPORT section 2).
+5. **Decisions Mel owns now.** WAVE-2-REPORT section 4: start Wave 3; the Round-refund rule.
+6. **Where the work is.** `tier-a` @ `dd5363d` plus this section, local, no remote; `main` at `781345a`; worktrees `sage-a1` to `sage-a7` kept.
+7. **What the contract got wrong.** Nothing in the gates. Process note: a Wave 1 test that asserts Wave 2 stubs guarantees red merges in Wave 2; the next plan should have the stub owner mark such assertions as handed over, or have each later lane own its router assertion.
