@@ -53,8 +53,17 @@ describe("router", () => {
     expect(await res.json()).toMatchObject({ kind: "guest", allowance: 3 });
   });
 
-  it.each(SESSION_ROUTES.slice(1))("%s %s is wired to its Wave 2 stub (501)", async (method, path) => {
-    expect(await call(req(method, path, { cookie }))).toEqual({ status: 501, error: "bad_request" });
+  // Each Wave 2 route reaches its real handler: the answer is that handler's own first check
+  // for a request with a valid cookie and no body, never the Wave 1 stub's 501.
+  const WAVE_2_FIRST_CHECK: [string, string, number, string | undefined][] = [
+    ["POST", "/api/voice", 400, "bad_request"],
+    ["DELETE", "/api/voice", 200, undefined],
+    ["POST", "/api/rounds", 400, "bad_request"],
+    ["POST", "/api/rounds/r1/replay", 404, "round_not_found"],
+    ["GET", "/api/rounds/r1/audio", 404, "round_not_found"],
+  ];
+  it.each(WAVE_2_FIRST_CHECK)("%s %s is wired to its Wave 2 handler", async (method, path, status, error) => {
+    expect(await call(req(method, path, { cookie }))).toEqual({ status, error });
   });
 
   it("POST /api/redeem needs no cookie", async () => {
@@ -68,7 +77,8 @@ describe("router", () => {
   });
 
   it.each(["/llm/v1/chat/completions", "/llm/chat/completions"])("POST %s reaches the LLM handler without a cookie", async (path) => {
-    expect(await call(req("POST", path))).toEqual({ status: 501, error: "bad_request" });
+    // 401 from the handler's own bearer check proves the router asked for no cookie.
+    expect(await call(req("POST", path))).toEqual({ status: 401, error: "unauthorized" });
   });
 
   it("answers 404 bad_request for unknown paths and wrong methods", async () => {
