@@ -70,3 +70,11 @@ Circuit breakers checked: no `package.json`/lockfile change (not in diff); no se
 ### Wave 1: dispatched 2026-09-29
 
 `/ultracode-wave 1`. Worktrees in `code/.worktrees/`: `sage-a1-access` (`wave1/a1-access`), `sage-a2-clients` (`wave1/a2-clients`), `sage-a3-content` (`wave1/a3-content`), `sage-a4-client` (`wave1/a4-client`), all from `tier-a` @ `92c377b`; declared in the workstream BRIEF. Branch prefix is `wave1/` because git refuses `tier-a/<x>` while a branch named `tier-a` exists. `pnpm install --frozen-lockfile` exited non-zero in each code worktree with `ERR_PNPM_IGNORED_BUILDS` (esbuild, workerd): the pre-existing `allowBuilds` placeholders in `pnpm-workspace.yaml`; packages and platform binaries are installed and baseline typecheck/test are green in the worktree. Gate checklist committed first: `da09cc1` `GATE-1-CHECKLIST.md`. Workflow run `wf_51ed7ab4-00f`.
+
+### Wave 1: completed 2026-09-29
+
+Four agents returned `DONE_WITH_CONCERNS`. The driver re-ran GATE-1-CHECKLIST on each worktree: ownership via three-dot diff clean (declared crossings only: A1 `test/index.test.ts`, A4 `test/client/*`, `public/favicon.svg`); authors all `19479678+troopdegen@users.noreply.github.com`; secrets 0/0/0; dependency files 0; `console.log` 0; unowned TODO 0; em-dashes 0. Per-branch typecheck 0 and tests A1 6 files/81, A2 5/57, A4 9/56 (A3 is doc-only). Merged one at a time into `tier-a`: `fd3c409` (A1) 6/81, `ddd84fe` (A2) 10/133, `3700146` (A3) 10/133, `b59ffa6` (A4) 18/184; typecheck 0 after each. `pnpm build` on `b59ffa6`: built (Worker plus client). Local boot smoke on `b59ffa6`: `/api/me` 401, `/admin/codes` 401 without bearer, `contact_required` without Contact, redeem with Contact 200 plus `sage_session` cookie, `/api/me` 200 with cookie, `/api/rounds` 501 stub, `/` 200. Report: `WAVE-1-REPORT.md`.
+
+### Gate 1 → 2: HELD
+
+Contract row: "`HUMAN` | n/a (content approval, live keys, probe authorisation)". Circuit breakers checked: none fired (no secret hit, no dependency change, no BLOCKED/NEEDS_CONTEXT, no test count fell, no build broke, no undeclared crossing, no spend or deploy). Held for Mel's five decisions listed in WAVE-1-REPORT section 4. Integration state: `tier-a` @ `b59ffa6` plus report/ledger commit, local only, nothing pushed.
