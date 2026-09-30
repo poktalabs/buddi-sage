@@ -66,3 +66,7 @@ src/worker/env.ts
 ```
 
 Circuit breakers checked: no `package.json`/lockfile change (not in diff); no secrets (files are types, placeholders and plan prose; `.dev.vars` absent); no agents ran; no spend, deploy or ElevenLabs change. Integration state: `tier-a` @ `7a6a726` plus this ledger append, local only, no remote.
+
+### Wave 1: dispatched 2026-09-29
+
+`/ultracode-wave 1`. Worktrees in `code/.worktrees/`: `sage-a1-access` (`wave1/a1-access`), `sage-a2-clients` (`wave1/a2-clients`), `sage-a3-content` (`wave1/a3-content`), `sage-a4-client` (`wave1/a4-client`), all from `tier-a` @ `92c377b`; declared in the workstream BRIEF. Branch prefix is `wave1/` because git refuses `tier-a/<x>` while a branch named `tier-a` exists. `pnpm install --frozen-lockfile` exited non-zero in each code worktree with `ERR_PNPM_IGNORED_BUILDS` (esbuild, workerd): the pre-existing `allowBuilds` placeholders in `pnpm-workspace.yaml`; packages and platform binaries are installed and baseline typecheck/test are green in the worktree. Gate checklist committed first: `da09cc1` `GATE-1-CHECKLIST.md`. Workflow run `wf_51ed7ab4-00f`.
