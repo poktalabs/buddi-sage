@@ -1,0 +1,20 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "buddi-sage",
+  "main": "src/worker/index.ts",
+  "compatibility_date": "2026-09-01",
+  "assets": { "not_found_handling": "single-page-application", "run_worker_first": ["/api/*", "/llm/*", "/admin/*"] },
+  "observability": { "enabled": true },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "buddi-sage", "database_id": "REPLACE_AFTER_d1_create", "migrations_dir": "migrations" }
+  ],
+  "vars": {
+    "ELEVEN_API_BASE": "https://api.elevenlabs.io",
+    "NEBIUS_API_BASE": "https://api.tokenfactory.nebius.com/v1",
+    "COACH_MODEL": "deepseek-ai/DeepSeek-V4-Pro-0813",
+    "REWRITE_MODEL": "MiniMaxAI/MiniMax-M3",
+    "TTS_MODEL": "eleven_multilingual_v2",
+    "AGENT_ID": ""
+  }
+  // Secrets (wrangler secret put / .dev.vars): ELEVENLABS_API_KEY, NEBIUS_API_KEY, LLM_PROXY_SECRET, SESSION_SECRET, ADMIN_SECRET
+}

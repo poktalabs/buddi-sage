@@ -1,0 +1,29 @@
+{
+  "name": "buddi-sage",
+  "version": "0.1.0",
+  "private": true,
+  "description": "BUDDi Sage Mode: a voice interview coach that replays your answer in your own voice (ElevenLabs + Nebius on a Cloudflare Worker)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite build && vite preview",
+    "deploy": "vite build && wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "db:migrate:local": "wrangler d1 migrations apply buddi-sage --local",
+    "db:migrate:remote": "wrangler d1 migrations apply buddi-sage --remote",
+    "cf-typegen": "wrangler types"
+  },
+  "dependencies": {
+    "@elevenlabs/client": "^1.25.0"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.62.0",
+    "@cloudflare/workers-types": "^5.20260929.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1",
+    "vitest": "^5.0.2",
+    "wrangler": "^4.143.0"
+  }
+}

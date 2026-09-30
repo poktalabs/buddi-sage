@@ -1,0 +1,7 @@
+const [,, model, extraArg='{}'] = process.argv; const extra=JSON.parse(extraArg);
+const sys="Rewrite the candidate's spoken interview answer into a confident, structured best-self answer (about 120 words, spoken style, no markdown). Use ONLY facts, numbers, tools and experiences present in the transcript. Never add new facts, metrics, technologies, or claims. Keep the candidate's own vocabulary where possible. Output only the rewritten answer.";
+const transcript="um so yeah at my last job we had this support bot, it was RAG over like the help center docs, and it kept making up refund policies. so I, uh, I added a reranker, cohere I think, and we made it say I don't know when the top chunk score was low. and we built a small eval set, maybe 80 questions, from real tickets. hallucinations went down a lot, I don't remember the exact number, maybe half? and yeah we also shortened chunks.";
+const t0=performance.now();
+const r=await fetch('https://api.tokenfactory.nebius.com/v1/chat/completions',{method:'POST',headers:{Authorization:`Bearer ${process.env.NEBIUS_API_KEY}`,'Content-Type':'application/json'},body:JSON.stringify({model,max_tokens:4000,temperature:0.4,messages:[{role:'system',content:sys},{role:'user',content:transcript}],...extra})});
+const j=await r.json(); const m=j.choices?.[0]?.message||{};
+console.log(`== ${model} ${extraArg} ${Math.round(performance.now()-t0)}ms usage=${JSON.stringify(j.usage?{in:j.usage.prompt_tokens,out:j.usage.completion_tokens}:j).slice(0,200)}\n${(m.content||'').trim()}\n`);

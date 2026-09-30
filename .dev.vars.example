@@ -1,0 +1,6 @@
+ELEVENLABS_API_KEY=
+NEBIUS_API_KEY=
+# Random strings, e.g. `openssl rand -hex 32`
+LLM_PROXY_SECRET=
+SESSION_SECRET=
+ADMIN_SECRET=
