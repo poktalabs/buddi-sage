@@ -86,15 +86,19 @@ function roundsLeft(): number {
 
 function renderHeader() {
   const right: Node[] = [];
-  if (me) right.push(h("span", { class: "chip nb-sm" }, `Rounds left: ${roundsLeft()}`));
+  if (me) right.push(h("span", { class: "ds-badge" }, `Rounds left: ${roundsLeft()}`));
   if (me?.hasVoice) right.push(deleteVoiceControl());
   header.replaceChildren(
-    isMock ? h("div", { class: "mock-banner" }, "Mock mode: nothing on this page reaches the real service.") : "",
     h(
       "div",
-      { class: "bar" },
-      h("div", { class: "brand" }, h("span", { class: "logo nb-sm" }, "B"), h("span", {}, h("span", { class: "kicker" }, "BUDDi"), h("strong", {}, " Sage Mode"))),
-      h("div", { class: "bar-right" }, ...right),
+      { class: "column" },
+      isMock ? h("p", { class: "ds-note mock-banner" }, "Mock mode: nothing on this page reaches the real service.") : "",
+      h(
+        "div",
+        { class: "bar" },
+        h("div", { class: "brand" }, h("span", { class: "logo nb-sm" }, "B"), h("span", {}, "BUDDi Sage Mode")),
+        h("div", { class: "bar-right" }, ...right),
+      ),
     ),
   );
 }
@@ -104,15 +108,15 @@ function deleteVoiceControl(): HTMLElement {
   const ask = () =>
     wrap.replaceChildren(
       h("span", { class: "confirm-text" }, "Delete your Voice clone? This cannot be undone."),
-      h("button", { class: "btn btn-danger nb-sm nb-press", onClick: confirm }, "Delete it"),
-      h("button", { class: "btn btn-plain nb-sm nb-press", onClick: idle }, "Keep it"),
+      h("button", { class: "ds-btn ds-btn-primary", onClick: confirm }, "Delete it"),
+      h("button", { class: "ds-btn ds-btn-ghost", onClick: idle }, "Keep it"),
     );
   const idle = () =>
     wrap.replaceChildren(
       h(
         "button",
         {
-          class: "btn btn-plain nb-sm nb-press",
+          class: "ds-btn ds-btn-ghost",
           disabled: roundLive,
           title: roundLive ? "Available after this Round" : undefined,
           onClick: ask,
@@ -127,7 +131,7 @@ function deleteVoiceControl(): HTMLElement {
       if (me) me = { ...me, hasVoice: false };
       showConsent("Your Voice clone is deleted.");
     } catch (e) {
-      wrap.replaceChildren(h("span", { class: "error-text" }, failureMessage(codeOf(e))));
+      wrap.replaceChildren(h("span", { class: "ds-note ds-note-error" }, failureMessage(codeOf(e))));
       setTimeout(idle, 4000);
     }
   };
@@ -138,11 +142,11 @@ function deleteVoiceControl(): HTMLElement {
 // ---------- screens ----------
 
 function panel(...children: Child[]) {
-  return h("section", { class: "panel nb" }, ...children);
+  return h("section", { class: "ds-card" }, ...children);
 }
 
 function title(kicker: string, text: string) {
-  return [h("p", { class: "kicker step" }, kicker), h("h1", { tabIndex: -1 }, text)];
+  return [h("p", { class: "kicker" }, kicker), h("h1", { tabIndex: -1 }, text)];
 }
 
 function showLoading(text = "Loading...") {
@@ -150,7 +154,7 @@ function showLoading(text = "Loading...") {
 }
 
 function showError(code: string, retry: () => void) {
-  mount(panel(...title("Something went wrong", "We hit a snag"), h("p", { role: "alert" }, failureMessage(code)), h("button", { class: "btn btn-primary nb-sm nb-press", onClick: retry }, "Try again")));
+  mount(panel(...title("Something went wrong", "We hit a snag"), h("p", { class: "ds-note ds-note-error", role: "alert" }, failureMessage(code)), h("button", { class: "ds-btn ds-btn-primary", onClick: retry }, "Try again")));
 }
 
 async function refreshMe(): Promise<Me | null> {
@@ -181,10 +185,10 @@ function route() {
 }
 
 function showCode(message?: string) {
-  const code = h("input", { id: "code", name: "code", autocomplete: "off", autocapitalize: "characters", required: true, placeholder: "SAGE-XXXX-XXXX" });
-  const contact = h("input", { id: "contact", name: "contact", autocomplete: "email", placeholder: "you@example.com or @handle" });
-  const error = h("p", { class: "error-text", role: "alert" }, message ?? "");
-  const submit = h("button", { class: "btn btn-primary nb-sm nb-press", type: "submit" }, "Continue");
+  const code = h("input", { id: "code", name: "code", autocomplete: "off", autocapitalize: "characters", required: true, placeholder: "SAGE-XXXX-XXXX", class: "ds-input" });
+  const contact = h("input", { id: "contact", name: "contact", autocomplete: "email", placeholder: "you@example.com or @handle", class: "ds-input" });
+  const error = h("p", { class: "ds-note ds-note-error", role: "alert" }, message ?? "");
+  const submit = h("button", { class: "ds-btn ds-btn-primary", type: "submit" }, "Continue");
 
   const form = h(
     "form",
@@ -205,10 +209,8 @@ function showCode(message?: string) {
         }
       },
     },
-    h("label", { for: "code" }, "Your code"),
-    code,
-    h("label", { for: "contact" }, "Email or X handle ", h("span", { class: "muted" }, "(needed the first time; used only to ask for your feedback)")),
-    contact,
+    h("div", { class: "field" }, h("label", { for: "code" }, "Your code"), code),
+    h("div", { class: "field" }, h("label", { for: "contact" }, "Email or X handle ", h("span", { class: "muted" }, "(needed the first time; used only to ask for your feedback)")), contact),
     error,
     submit,
   );
@@ -224,7 +226,7 @@ function showCode(message?: string) {
 
 function showConsent(notice?: string) {
   const box = h("input", { type: "checkbox", id: "consent" });
-  const next = h("button", { class: "btn btn-primary nb-sm nb-press", disabled: true, onClick: () => showVoice() }, "Continue to your Voice sample");
+  const next = h("button", { class: "ds-btn ds-btn-primary", disabled: true, onClick: () => showVoice() }, "Continue to your Voice sample");
   box.addEventListener("change", () => (next.disabled = !box.checked));
 
   const body = h("div", { class: "prose reading" });
@@ -232,24 +234,24 @@ function showConsent(notice?: string) {
 
   mount(
     panel(
-      notice ? h("p", { class: "notice nb-sm", role: "status" }, notice) : "",
+      notice ? h("p", { class: "ds-note ds-note-success", role: "status" }, notice) : "",
       ...title("Step 1 of 3: Consent", "Your voice, your call"),
       body,
-      h("label", { class: "check nb-sm", for: "consent" }, box, h("span", {}, "This is my own voice and I consent to cloning it")),
+      h("label", { class: "check inset nb-sm", for: "consent" }, box, h("span", {}, "This is my own voice and I consent to cloning it")),
       next,
     ),
   );
 }
 
 function showVoice() {
-  const script = h("div", { class: "prose reading script nb-sm" });
+  const script = h("div", { class: "prose reading script inset nb-sm" });
   script.innerHTML = renderMarkdown(readingScriptMd);
 
   const timer = h("p", { class: "timer", "aria-live": "off" }, "0:00");
   const nudge = h("p", { class: "muted", role: "status" }, `Read the script aloud at your normal pace. Aim for at least ${MIN_SAMPLE_SECONDS} seconds.`);
   const controls = h("div", { class: "row" });
   const preview = h("div", { class: "stack" });
-  const error = h("p", { class: "error-text", role: "alert" });
+  const error = h("p", { class: "ds-note ds-note-error", role: "alert" });
 
   let recording: Awaited<ReturnType<typeof startRecording>> | null = null;
   let tick: ReturnType<typeof setInterval> | undefined;
@@ -292,7 +294,7 @@ function showVoice() {
         s < MIN_SAMPLE_SECONDS ? `Keep reading: ${Math.ceil(MIN_SAMPLE_SECONDS - s)} more seconds to reach ${MIN_SAMPLE_SECONDS}.` : "That is enough for a good Voice clone. Stop whenever you finish a sentence.";
       if (s >= MAX_SAMPLE_SECONDS) void stop();
     }, 250);
-    setControls(h("button", { class: "btn btn-danger nb-sm nb-press", onClick: stop }, "Stop"));
+    setControls(h("button", { class: "ds-btn ds-btn-primary", onClick: stop }, "Stop"));
   };
 
   const stop = async () => {
@@ -321,8 +323,8 @@ function showVoice() {
       isMock ? h("a", { href: objectUrl, download: sampleFilename(s.mimeType), class: "muted" }, "Mock mode: save this sample as a file") : "",
     );
     setControls(
-      h("button", { class: "btn btn-primary nb-sm nb-press", onClick: upload }, "Use this Voice sample"),
-      h("button", { class: "btn btn-plain nb-sm nb-press", onClick: record }, "Record again"),
+      h("button", { class: "ds-btn ds-btn-primary", onClick: upload }, "Use this Voice sample"),
+      h("button", { class: "ds-btn ds-btn-ghost", onClick: record }, "Record again"),
     );
   };
 
@@ -347,13 +349,13 @@ function showVoice() {
   };
 
   const idle = () => {
-    const buttons: HTMLElement[] = [h("button", { class: "btn btn-primary nb-sm nb-press", onClick: record }, "Start recording")];
+    const buttons: HTMLElement[] = [h("button", { class: "ds-btn ds-btn-primary", onClick: record }, "Start recording")];
     if (isMock) {
       buttons.push(
         h(
           "button",
           {
-            class: "btn btn-plain nb-sm nb-press",
+            class: "ds-btn ds-btn-ghost",
             onClick: async () => setRecorded({ blob: (await import("./mock")).toneWav(2), mimeType: "audio/wav", seconds: 2 }),
           },
           "Mock mode: use a test tone",
@@ -369,7 +371,7 @@ function showVoice() {
       ...title("Step 2 of 3: Voice sample", "Read this aloud"),
       h("p", { class: "muted" }, "Your Voice sample makes the Voice clone that speaks your Replay. Sage keeps its own voice."),
       script,
-      h("div", { class: "recorder nb-sm" }, timer, nudge, preview, controls, error),
+      h("div", { class: "recorder inset nb-sm" }, timer, nudge, preview, controls, error),
     ),
   );
 }
@@ -381,10 +383,10 @@ function showPicker(notice?: string) {
 
   mount(
     panel(
-      notice ? h("p", { class: "notice nb-sm", role: "status" }, notice) : "",
+      notice ? h("p", { class: "ds-note ds-note-success", role: "status" }, notice) : "",
       ...title("Step 3 of 3: Pick a Question", "What should Sage ask you?"),
       h("p", { class: "muted" }, "Sage asks the Question, listens to your Answer, pushes back once, then you answer again. Each Question you practice uses one Round."),
-      left <= 0 ? h("p", { class: "error-text", role: "alert" }, failureMessage("allowance_used")) : "",
+      left <= 0 ? h("p", { class: "ds-note ds-note-error", role: "alert" }, failureMessage("allowance_used")) : "",
       h(
         "ul",
         { class: "questions" },
@@ -396,7 +398,7 @@ function showPicker(notice?: string) {
               "button",
               { class: "question nb nb-press", disabled: left <= 0, onClick: () => pick(q) },
               h("span", { class: "reading" }, q.text),
-              saved.has(q.id) ? h("span", { class: "badge nb-sm" }, "In your Story bank") : "",
+              saved.has(q.id) ? h("span", { class: "ds-badge ds-badge-success" }, "In your Story bank") : "",
             ),
           ),
         ),
@@ -409,11 +411,11 @@ function showPicker(notice?: string) {
 function showRound(q: Question) {
   const status = h("p", { class: "status", role: "status" }, "Checking your microphone...");
   const pulse = h("div", { class: "pulse", "aria-hidden": "true" });
-  const endButton = h("button", { class: "btn btn-plain nb-sm nb-press" }, "End Round");
+  const endButton = h("button", { class: "ds-btn ds-btn-ghost" }, "End Round");
   const controller = new AbortController();
   endButton.addEventListener("click", () => controller.abort());
 
-  mount(panel(h("p", { class: "kicker step" }, "Round"), h("h1", { tabIndex: -1, class: "question-text" }, q.text), h("div", { class: "live nb-sm" }, pulse, status), endButton));
+  mount(panel(h("p", { class: "kicker" }, "Round"), h("h1", { tabIndex: -1, class: "question-text" }, q.text), h("div", { class: "live inset nb-sm" }, pulse, status), endButton));
 
   activeRound = controller;
   roundLive = true;
@@ -478,9 +480,9 @@ async function showRoundProblem(code: string, spent: boolean) {
   mount(
     panel(
       ...title("Round", code === "aborted" ? "Round ended" : "That Round did not finish"),
-      h("p", { role: "alert" }, failureMessage(code)),
+      h("p", { class: "ds-note ds-note-error", role: "alert" }, failureMessage(code)),
       spent ? h("p", { class: "muted" }, "This Round still counts toward your Rounds.") : "",
-      h("button", { class: "btn btn-primary nb-sm nb-press", onClick: () => route() }, "Back to the Questions"),
+      h("button", { class: "ds-btn ds-btn-primary", onClick: () => route() }, "Back to the Questions"),
     ),
   );
 }
@@ -507,8 +509,8 @@ function showReplay(question: { id: string; text: string }, replay: ReplayRespon
       audio.play().catch(() => undefined); // autoplay may be blocked; the controls stay
     } catch (e) {
       player.replaceChildren(
-        h("p", { class: "error-text", role: "alert" }, failureMessage(codeOf(e))),
-        h("button", { class: "btn btn-plain nb-sm nb-press", onClick: load }, "Load the Replay again"),
+        h("p", { class: "ds-note ds-note-error", role: "alert" }, failureMessage(codeOf(e))),
+        h("button", { class: "ds-btn ds-btn-ghost", onClick: load }, "Load the Replay again"),
       );
     }
   };
@@ -518,15 +520,15 @@ function showReplay(question: { id: string; text: string }, replay: ReplayRespon
       ...title("Replay", "Now listen to your best self"),
       h("p", { class: "muted" }, question.text),
       player,
-      replay.status === "fallback" ? h("p", { class: "notice nb-sm" }, "We kept your own words this time.") : "",
+      replay.status === "fallback" ? h("p", { class: "ds-note ds-note-info" }, "We kept your own words this time.") : "",
       h("h2", {}, "Your Best-self answer"),
-      h("p", { class: "reading best-self" }, replay.best_self_text),
-      h("details", { class: "said nb-sm" }, h("summary", {}, "What you said"), h("p", { class: "reading" }, replay.final_answer)),
+      h("p", { class: "ds-card ds-card-violet best-self" }, replay.best_self_text),
+      h("details", { class: "said inset nb-sm" }, h("summary", {}, "What you said"), h("p", { class: "reading" }, replay.final_answer)),
       h("p", { class: "muted small" }, "Saved to your Story bank on this device."),
       h(
         "button",
         {
-          class: "btn btn-primary nb-sm nb-press",
+          class: "ds-btn ds-btn-primary",
           onClick: async () => {
             showLoading();
             try {
