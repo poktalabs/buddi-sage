@@ -5,6 +5,7 @@
   "compatibility_date": "2026-09-01",
   "assets": { "not_found_handling": "single-page-application", "run_worker_first": ["/api/*", "/llm/*", "/admin/*"] },
   "observability": { "enabled": true },
+  "routes": [{ "pattern": "sage.agentcamp.xyz", "custom_domain": true }],
   "triggers": { "crons": ["17 * * * *"] },
   "d1_databases": [
     { "binding": "DB", "database_name": "buddi-sage", "database_id": "6b099f7f-347e-481b-8966-1d9126be924a", "migrations_dir": "migrations" }
