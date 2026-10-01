@@ -26,13 +26,16 @@ async function errorOf(res: Response): Promise<string> {
 }
 
 describe("normaliseContact", () => {
-  it("accepts an email or an X handle, trimmed", () => {
+  it("accepts an email or a social handle, trimmed; the @ is optional and always stored", () => {
     expect(normaliseContact("  mel@example.com ")).toBe("mel@example.com");
     expect(normaliseContact("@troop_degen")).toBe("@troop_degen");
+    expect(normaliseContact("troop_degen")).toBe("@troop_degen");
+    expect(normaliseContact("ana.dev")).toBe("@ana.dev");
+    expect(normaliseContact("https://instagram.com/ana.dev")).toBe("@ana.dev");
   });
 
   it("rejects anything else", () => {
-    for (const bad of ["", "   ", "mel", "mel@", "@", "@has space", "@this_handle_is_too_long", "a b@c.d", `${"a".repeat(250)}@x.io`]) {
+    for (const bad of ["", "   ", "mel@", "@", "@has space", `@${"a".repeat(31)}`, "a b@c.d", `${"a".repeat(250)}@x.io`]) {
       expect(normaliseContact(bad)).toBeNull();
     }
   });

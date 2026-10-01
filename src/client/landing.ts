@@ -7,12 +7,12 @@
 //   the browser's language.
 // - Copy uses the glossary words (Round, Question, Answer, Voice clone, Best-self answer, Replay)
 //   and makes no claim the product does not back: the rewrite keeps the Guest's facts (guards.ts).
-import type { Lang } from "../shared/api";
+import type { Lang, Platform } from "../shared/api";
 import { failureMessage } from "./copy";
 
 export const LANG_KEY = "buddi-sage:lang";
 
-export type Social = "instagram" | "x" | "tiktok";
+export type Social = Platform;
 
 /**
  * Mel's profiles, where requesters send their DM after the form. Only confirmed profiles are
@@ -48,12 +48,14 @@ export type LandingCopy = {
     handle: string;
     job: string;
     jobPlaceholder: string;
-    submit: string;
+    pick: string; // shown over the logos once the handle has 3 characters
+    handleRule: string; // shown instead of the logos when the handle has characters a handle can't
     sending: string;
     dmTitle: string;
-    dmBody: (handle: string) => string;
+    dmBody: (handle: string, network: string) => string;
     dmNote: string;
     dmLabel: (network: string) => string;
+    dmAgain: (network: string) => string;
   };
   howTitle: string;
   steps: { title: string; body: string }[];
@@ -76,22 +78,24 @@ export const LANDING: Record<Lang, LandingCopy> = {
     haveCode: {
       title: "Have a code?",
       code: "Your code",
-      contact: "Email or X handle",
+      contact: "Email or @handle",
       contactHint: "(first time only; used only to ask for your feedback)",
       submit: "Start practicing",
     },
     request: {
       title: "Request a code",
-      blurb: "Codes are free while Sage Mode is invite-only. Leave your handle, then DM me to get yours.",
+      blurb: "Codes are free while Sage Mode is invite-only. Type your handle, then tap where you'll DM me.",
       handle: "Your Instagram, X or TikTok handle",
       job: "The job you are preparing for (optional)",
       jobPlaceholder: "A link or a job title",
-      submit: "Request a code",
+      pick: "Tap where you'll DM me",
+      handleRule: "A handle has only letters, numbers, dots and underscores.",
       sending: "Sending...",
-      dmTitle: "One more step: DM me",
-      dmBody: (h) => `Send me a DM from ${h} to get your code. Tap where you want to write:`,
+      dmTitle: "Now send me the DM",
+      dmBody: (h, n) => `Send me a DM on ${n} from ${h} to get your code.`,
       dmNote: "I reply with your code as soon as I see it.",
       dmLabel: (n) => `DM me on ${n}`,
+      dmAgain: (n) => `Open ${n}`,
     },
     howTitle: "How it works",
     steps: [
@@ -121,22 +125,24 @@ export const LANDING: Record<Lang, LandingCopy> = {
     haveCode: {
       title: "¿Tienes un código?",
       code: "Tu código",
-      contact: "Email o usuario de X",
+      contact: "Email o @usuario",
       contactHint: "(solo la primera vez; solo para pedirte tu opinión)",
       submit: "Empezar a practicar",
     },
     request: {
       title: "Pide un código",
-      blurb: "Los códigos son gratis mientras Sage Mode es por invitación. Deja tu usuario y escríbeme por DM para recibir el tuyo.",
+      blurb: "Los códigos son gratis mientras Sage Mode es por invitación. Escribe tu usuario y toca dónde me vas a escribir.",
       handle: "Tu usuario de Instagram, X o TikTok",
       job: "La vacante para la que te preparas (opcional)",
       jobPlaceholder: "Un enlace o el nombre del puesto",
-      submit: "Pedir un código",
+      pick: "Toca dónde me vas a escribir",
+      handleRule: "Un usuario solo tiene letras, números, puntos y guiones bajos.",
       sending: "Enviando...",
-      dmTitle: "Un paso más: escríbeme por DM",
-      dmBody: (h) => `Envíame un DM desde ${h} para recibir tu código. Toca dónde quieres escribirme:`,
+      dmTitle: "Ahora envíame el DM",
+      dmBody: (h, n) => `Envíame un DM por ${n} desde ${h} para recibir tu código.`,
       dmNote: "Te respondo con tu código en cuanto lo vea.",
       dmLabel: (n) => `Escríbeme por ${n}`,
+      dmAgain: (n) => `Abrir ${n}`,
     },
     howTitle: "Cómo funciona",
     steps: [

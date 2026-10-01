@@ -4,7 +4,7 @@
 // Voice clone is only cleaned up an hour after the last Round started, so the hourly cron
 // cannot delete it between that Round's start and its Replay. Owner codes are never cleaned.
 // Timestamps written here are ISO 8601 UTC strings, which compare correctly as text.
-import type { CodeKind, Lang } from "../shared/api";
+import type { CodeKind, Lang, Platform } from "../shared/api";
 import type { GuardFailure } from "./guards";
 
 export type CodeRow = {
@@ -199,6 +199,7 @@ export type RequestStatus = "pending" | "approved" | "dismissed";
 export type CodeRequestRow = {
   id: number;
   handle: string;
+  platform: Platform | null;
   job: string | null;
   lang: Lang;
   status: RequestStatus;
@@ -209,11 +210,11 @@ export type CodeRequestRow = {
 
 export async function insertCodeRequest(
   db: D1Database,
-  args: { handle: string; job: string | null; lang: Lang; ip_hash: string | null; now: Date },
+  args: { handle: string; platform?: Platform | null; job: string | null; lang: Lang; ip_hash: string | null; now: Date },
 ): Promise<number> {
   const row = await db
-    .prepare("INSERT INTO code_requests (handle, job, lang, ip_hash, created_at) VALUES (?, ?, ?, ?, ?) RETURNING id")
-    .bind(args.handle, args.job, args.lang, args.ip_hash, args.now.toISOString())
+    .prepare("INSERT INTO code_requests (handle, platform, job, lang, ip_hash, created_at) VALUES (?, ?, ?, ?, ?, ?) RETURNING id")
+    .bind(args.handle, args.platform ?? null, args.job, args.lang, args.ip_hash, args.now.toISOString())
     .first<{ id: number }>();
   return row!.id;
 }
