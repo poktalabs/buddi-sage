@@ -21,6 +21,9 @@ export const FAILURE_COPY: Record<string, string> = {
   empty_answer: "We did not hear an Answer to save in that Round, so there is no Replay this time.",
   upstream_error: "A service we depend on did not answer. Please try again in a moment.",
   rate_limited: "Too many requests from here. Please try again in an hour.",
+  job_fetch_failed: "We could not read that link. Some job sites block it. Paste the job post text instead.",
+  job_unreadable: "We could not find a job in that. Paste the job post, or at least the job title.",
+  job_limit: "This code has set its job too many times. Keep practicing with the current one.",
   network: "You look offline. Check your connection and try again.",
   bad_response: "Something went wrong on our side. Please try again.",
   // Page-side Round failures (round.ts).

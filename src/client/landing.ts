@@ -67,7 +67,7 @@ export const LANDING: Record<Lang, LandingCopy> = {
     toggleHave: "I have a code",
     ctaLabel: "Get started",
     headline: ["Enter", "Sage Mode."],
-    lede: "Sage asks you one hard interview Question and pushes back once. Then you hear your best answer, in your own voice.",
+    lede: "Paste the job you want. Sage asks you a hard interview Question for it and pushes back once. Then you hear your best answer, in your own voice.",
     haveCode: {
       title: "Have a code?",
       code: "Your code",
@@ -90,8 +90,9 @@ export const LANDING: Record<Lang, LandingCopy> = {
     },
     howTitle: "How it works",
     steps: [
+      { title: "Add your job", body: "Paste a link to the job post, or the post itself. Sage reads it and asks Questions for that role." },
       { title: "Record a Voice sample", body: "Read a short script aloud for about a minute. It makes the Voice clone that speaks your Replay." },
-      { title: "Answer Sage", body: "Sage asks one Question, listens, pushes back once, and you answer again. About two minutes." },
+      { title: "Answer Sage", body: "Sage asks one Question for your job, listens, pushes back once, and you answer again. About two minutes." },
       { title: "Hear your best self", body: "Your final Answer comes back tighter, in your own voice. It keeps your facts and adds none." },
     ],
     notesTitle: "Good to know",
@@ -109,7 +110,7 @@ export const LANDING: Record<Lang, LandingCopy> = {
     toggleHave: "Tengo un código",
     ctaLabel: "Empieza",
     headline: ["Entra en", "Sage Mode."],
-    lede: "Sage te hace una pregunta difícil de entrevista y te contradice una vez. Después escuchas tu mejor respuesta, con tu propia voz.",
+    lede: "Pega el trabajo que quieres. Sage te hace una pregunta difícil de entrevista para ese puesto y te contradice una vez. Después escuchas tu mejor respuesta, con tu propia voz.",
     haveCode: {
       title: "¿Tienes un código?",
       code: "Tu código",
@@ -132,8 +133,9 @@ export const LANDING: Record<Lang, LandingCopy> = {
     },
     howTitle: "Cómo funciona",
     steps: [
+      { title: "Agrega tu trabajo", body: "Pega el enlace de la oferta o el texto completo. Sage la lee y te hace preguntas para ese puesto." },
       { title: "Graba una muestra de voz", body: "Lee en voz alta un texto corto durante un minuto. Con eso se crea el clon de voz que dice tu Replay." },
-      { title: "Responde a Sage", body: "Sage hace una pregunta, escucha, te contradice una vez y vuelves a responder. Unos dos minutos." },
+      { title: "Responde a Sage", body: "Sage hace una pregunta para tu puesto, escucha, te contradice una vez y vuelves a responder. Unos dos minutos." },
       { title: "Escucha tu mejor versión", body: "Tu respuesta final regresa más clara, con tu propia voz. Conserva tus datos y no agrega ninguno." },
     ],
     notesTitle: "Para que sepas",
