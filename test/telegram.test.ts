@@ -31,7 +31,7 @@ async function say(text: string): Promise<string> {
   return body.text;
 }
 
-const codesIn = (text: string) => text.match(/SAGE-[A-Z0-9]{4}-[A-Z0-9]{4}/g) ?? [];
+const codesIn = (text: string) => [...new Set(text.match(/SAGE-[A-Z0-9]{4}-[A-Z0-9]{4}/g) ?? [])];
 
 describe("telegram webhook access", () => {
   it("401 without or with a wrong secret header", async () => {
@@ -66,7 +66,9 @@ describe("telegram commands", () => {
   });
 
   it("/guest issues Guest codes with 3 Rounds and an optional note", async () => {
-    const one = codesIn(await say("/guest"));
+    const reply = await say("/guest");
+    const one = codesIn(reply);
+    expect(reply).toContain(`https://sage.test/?code=${one[0]}`);
     expect(one).toHaveLength(1);
     expect(await getCode(env.DB, one[0]!)).toMatchObject({ kind: "guest", allowance: 3, note: null });
 
@@ -98,7 +100,7 @@ describe("telegram commands", () => {
     const [code] = codesIn(text);
     expect(text).toContain("Reply to @ana.dev's DM with:");
     expect(text).toContain("La práctica es en inglés");
-    expect(text).toContain("https://sage.test");
+    expect(text).toContain(`https://sage.test/?code=${code}`);
     expect(await getCode(env.DB, code!)).toMatchObject({ kind: "guest", allowance: 3, contact: "@ana.dev", note: `request #${id}` });
     expect(await getCodeRequest(env.DB, id)).toMatchObject({ status: "approved", code });
 
@@ -140,5 +142,7 @@ describe("telegram commands", () => {
   it("writes the invite in English or Spanish", () => {
     expect(inviteText("SAGE-AAAA-BBBB", 1, "https://x.test", "en")).toContain("1 Round (one");
     expect(inviteText("SAGE-AAAA-BBBB", 3, "https://x.test", "es")).toContain("3 Rondas");
+    expect(inviteText("SAGE-AAAA-BBBB", 3, "https://x.test", "en")).toContain("Start here: https://x.test/?code=SAGE-AAAA-BBBB");
+    expect(inviteText("SAGE-AAAA-BBBB", 3, "https://x.test", "es")).toContain("Empieza aquí: https://x.test/?code=SAGE-AAAA-BBBB");
   });
 });

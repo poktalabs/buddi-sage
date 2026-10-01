@@ -46,19 +46,24 @@ export function parseCommand(text: string): { cmd: string; args: string[] } | nu
 
 const toInt = (s: string | undefined): number | null => (s !== undefined && /^\d+$/.test(s) ? Number(s) : null);
 
+/** A link that opens the landing page on "I have a code" with the code filled in. */
+export function codeLink(origin: string, code: string): string {
+  return `${origin}/?code=${encodeURIComponent(code)}`;
+}
+
 /** The message Mel forwards to the requester, in the language they used on the landing page. */
 export function inviteText(code: string, rounds: number, origin: string, lang: Lang): string {
   if (lang === "es") {
     return [
       `Aquí está tu código de BUDDi Sage Mode: ${code}`,
       `Incluye ${rounds} ${rounds === 1 ? "Ronda" : "Rondas"} (una pregunta de entrevista cada una). La práctica es en inglés.`,
-      `Empieza en ${origin}`,
+      `Empieza aquí: ${codeLink(origin, code)}`,
     ].join("\n");
   }
   return [
     `Here is your BUDDi Sage Mode code: ${code}`,
     `It gives you ${rounds} ${rounds === 1 ? "Round" : "Rounds"} (one interview Question each).`,
-    `Start at ${origin}`,
+    `Start here: ${codeLink(origin, code)}`,
   ].join("\n");
 }
 
@@ -73,14 +78,14 @@ async function run(cmd: string, args: string[], env: Env, origin: string): Promi
       const noteWords = toInt(args[0]) !== null ? args.slice(1) : args;
       const codes = await issueCodes(env, { kind: "guest", count, note: noteWords.join(" ") || undefined });
       if (!codes) return `Usage: /guest [count 1-${MAX_COUNT}] [note]`;
-      return [`${codes.length} Guest ${codes.length === 1 ? "code" : "codes"}, ${DEFAULT_ALLOWANCE.guest} Rounds each:`, ...codes].join("\n");
+      return [`${codes.length} Guest ${codes.length === 1 ? "code" : "codes"}, ${DEFAULT_ALLOWANCE.guest} Rounds each:`, ...codes.map((c) => `${c}  ${codeLink(origin, c)}`)].join("\n");
     }
 
     case "gift": {
       const rounds = toInt(args[0]);
       const codes = rounds === null ? null : await issueCodes(env, { kind: "gift", allowance: rounds, note: args.slice(1).join(" ") || undefined });
       if (!codes) return `Usage: /gift <rounds 1-${MAX_ALLOWANCE}> [note]`;
-      return `Gift code, ${rounds} Rounds:\n${codes[0]}`;
+      return `Gift code, ${rounds} Rounds:\n${codes[0]}\n${codeLink(origin, codes[0]!)}`;
     }
 
     case "requests": {
