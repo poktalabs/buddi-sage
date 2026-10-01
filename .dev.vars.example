@@ -4,3 +4,7 @@ NEBIUS_API_KEY=
 LLM_PROXY_SECRET=
 SESSION_SECRET=
 ADMIN_SECRET=
+# Optional Telegram admin bot (all three, or the bot and request pings stay off)
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_WEBHOOK_SECRET=
+TELEGRAM_OWNER_ID=
