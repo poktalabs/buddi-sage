@@ -69,6 +69,7 @@ let me: Me | null = null;
 let roundLive = false;
 let teardown: (() => void)[] = [];
 let activeRound: AbortController | null = null;
+let landingMode: "request" | "have" = "request";
 let lang: Lang = initialLang(localStorage.getItem(LANG_KEY), navigator.languages ?? [navigator.language]);
 
 const header = document.getElementById("header")!;
@@ -233,7 +234,7 @@ function showLanding(message?: string) {
   const website = h("input", { name: "website", tabIndex: -1, autocomplete: "off", "aria-hidden": "true", class: "hp" });
   const reqError = h("p", { class: "ds-note ds-note-error", role: "alert" });
   const reqSubmit = h("button", { class: "ds-btn ds-btn-violet", type: "submit" }, t.request.submit);
-  const requestCard = h("section", { class: "ds-card cta-card" });
+  const requestCard = h("div", {});
   const requestForm = h(
     "form",
     {
@@ -260,7 +261,27 @@ function showLanding(message?: string) {
     reqError,
     reqSubmit,
   );
-  requestCard.replaceChildren(h("h2", {}, t.request.title), h("p", { class: "muted" }, t.request.blurb), requestForm);
+  requestCard.replaceChildren(h("p", { class: "muted" }, t.request.blurb), requestForm);
+
+  // One card, two modes. A link with ?code= or an ended Session opens on "I have a code".
+  const fromLink = new URLSearchParams(location.search).get("code");
+  if (fromLink) {
+    code.value = fromLink.toUpperCase();
+    landingMode = "have";
+  }
+  if (message) landingMode = "have";
+  const haveCard = h("div", {}, codeForm);
+  const panelBox = h("div", { class: "cta-panel", role: "tabpanel" });
+  const tabs = (["request", "have"] as const).map((m) =>
+    h("button", { type: "button", role: "tab", class: "seg", onClick: () => setMode(m) }, m === "request" ? t.toggleRequest : t.toggleHave),
+  );
+  const setMode = (m: "request" | "have", focus = true) => {
+    landingMode = m;
+    tabs.forEach((b, i) => b.setAttribute("aria-selected", String((i === 0 ? "request" : "have") === m)));
+    panelBox.replaceChildren(m === "request" ? requestCard : haveCard);
+    if (focus) (m === "request" ? handle : code).focus({ preventScroll: true });
+  };
+  setMode(landingMode, false);
 
   mount(
     h(
@@ -269,11 +290,15 @@ function showLanding(message?: string) {
       h(
         "section",
         { class: "hero" },
-        h("div", { class: "hero-text" }, h("p", { class: "kicker" }, t.kicker), h("h1", { tabIndex: -1 }, t.headline)),
-        h("img", { class: "hero-art", src: "/sage-hero.svg", alt: "", width: 360, height: 300 }),
-        h("p", { class: "reading lede" }, t.lede),
+        h(
+          "div",
+          { class: "hero-main" },
+          h("div", { class: "hero-head" }, h("div", {}, h("p", { class: "kicker" }, t.kicker), h("h1", { tabIndex: -1 }, t.headline)), h("img", { class: "hero-art hero-art-sm", src: "/sage-hero.svg", alt: "", width: 360, height: 300 })),
+          h("p", { class: "reading lede" }, t.lede),
+          h("div", { class: "ds-card cta" }, h("div", { class: "segmented nb-sm", role: "tablist", "aria-label": t.ctaLabel }, ...tabs), panelBox),
+        ),
+        h("img", { class: "hero-art hero-art-lg", src: "/sage-hero.svg", alt: "", width: 360, height: 300 }),
       ),
-      h("div", { class: "cta-grid" }, h("section", { class: "ds-card cta-card" }, h("h2", {}, t.haveCode.title), codeForm), requestCard),
       h(
         "section",
         { class: "how" },
@@ -297,7 +322,7 @@ function showDmStep(card: HTMLElement, who: string) {
     icon.innerHTML = SOCIAL_ICONS[p.network]; // static markup from landing.ts
     return h("a", { class: "social-link nb-sm nb-press", href: p.url, target: "_blank", rel: "noopener", "aria-label": t.dmLabel(p.name) }, icon, h("span", {}, p.name));
   });
-  const title = h("h2", { tabIndex: -1 }, t.dmTitle);
+  const title = h("h2", { tabIndex: -1, class: "dm-title" }, t.dmTitle);
   card.replaceChildren(title, h("p", { role: "status" }, t.dmBody(who)), h("div", { class: "social-row" }, ...links), h("p", { class: "muted small" }, t.dmNote));
   title.focus();
 }

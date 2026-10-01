@@ -35,6 +35,9 @@ export type LandingCopy = {
   toggleLabel: string; // accessible name for that button
   kicker: string;
   headline: string;
+  toggleRequest: string;
+  toggleHave: string;
+  ctaLabel: string;
   lede: string;
   haveCode: { title: string; code: string; contact: string; contactHint: string; submit: string };
   request: {
@@ -62,6 +65,9 @@ export const LANDING: Record<Lang, LandingCopy> = {
     toggle: "ES",
     toggleLabel: "Ver en español",
     kicker: "Interview practice, out loud",
+    toggleRequest: "Get a code",
+    toggleHave: "I have a code",
+    ctaLabel: "Get started",
     headline: "Hear your best interview answer, in your own voice",
     lede: "Sage asks you a hard interview Question out loud and pushes back once. Then you hear your own Answer, tightened into your Best-self answer and spoken in your Voice clone.",
     haveCode: {
@@ -102,6 +108,9 @@ export const LANDING: Record<Lang, LandingCopy> = {
     toggle: "EN",
     toggleLabel: "View in English",
     kicker: "Práctica de entrevista, en voz alta",
+    toggleRequest: "Quiero un código",
+    toggleHave: "Tengo un código",
+    ctaLabel: "Empieza",
     headline: "Escucha tu mejor respuesta de entrevista, con tu propia voz",
     lede: "Sage te hace en voz alta una pregunta difícil de entrevista y te contradice una vez. Después escuchas tu propia respuesta, pulida como tu mejor versión y dicha con tu clon de voz.",
     haveCode: {

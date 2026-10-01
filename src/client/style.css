@@ -206,26 +206,36 @@ audio { width: 100%; margin: 0 0 12px; }
 
 /* Landing: hero, the two calls to action side by side, how it works, notes. */
 .landing { padding: 8px 0 0; }
-/* Hero: text and Sage side by side; on a phone Sage stays small beside the headline so both
-   calls to action stay near the top. */
-.hero { margin: 8px 0 20px; display: grid; grid-template-columns: 1fr 112px; grid-template-areas: "text art" "lede lede"; gap: 0 12px; align-items: center; }
-.hero-text { grid-area: text; }
-.hero-art { grid-area: art; width: 100%; height: auto; }
-.lede { grid-area: lede; max-width: 40rem; }
-.hero h1 { font-size: 1.875rem; margin-bottom: 0.75rem; }
+/* Hero: headline, lede and one call-to-action card on the left, Sage large on the right. On a
+   phone Sage shrinks beside the headline so the card stays near the top. */
+.hero { display: grid; grid-template-columns: 1fr; gap: 24px; align-items: center; margin: 8px 0 8px; }
+.hero-head { display: grid; grid-template-columns: 1fr 104px; gap: 12px; align-items: center; }
+.hero h1 { font-size: 2rem; line-height: 1.05; margin: 0.25rem 0 0.75rem; }
+.lede { max-width: 36rem; margin-bottom: 20px; }
+.hero-art { width: 100%; height: auto; }
+.hero-art-lg { display: none; }
 @media (min-width: 720px) {
-  .hero { grid-template-columns: 1fr 260px; grid-template-areas: "text art" "lede art"; gap: 0 24px; }
+  .hero { grid-template-columns: 1fr 300px; gap: 32px; margin-top: 24px; }
+  .hero-head { grid-template-columns: 1fr; }
+  .hero-art-sm { display: none; }
+  .hero-art-lg { display: block; align-self: center; }
+  .hero h1 { font-size: 2.5rem; }
 }
-.cta-grid { display: grid; grid-template-columns: 1fr; gap: 20px; align-items: start; }
-@media (min-width: 720px) { .cta-grid { grid-template-columns: 1fr 1fr; } }
-.cta-card { margin: 0; }
-.cta-card h2, .how h2, .notes h2 { margin-top: 0; }
+/* The call-to-action card: a segmented toggle, then the active form. */
+.cta { margin: 0; max-width: 30rem; }
+.segmented { display: grid; grid-template-columns: 1fr 1fr; border-radius: 6px; overflow: hidden; margin: 0 0 20px; background: var(--color-panel); }
+.seg { border: 0; background: transparent; color: var(--color-ink); font: inherit; font-weight: 800; padding: 10px 12px; cursor: pointer; }
+.seg + .seg { border-left: 2px solid var(--color-ink); }
+.seg[aria-selected="true"] { background: var(--color-ink); color: #fff; }
+.seg:focus-visible { outline: 3px solid var(--color-magenta); outline-offset: -3px; }
+.dm-title { margin-top: 0; }
+.how h2, .notes h2 { margin-top: 0; }
 .hint { font-weight: 500; }
 .social-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 0 16px; }
 .social-link { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 84px; padding: 12px 14px;
   background: var(--color-panel); color: var(--color-ink); border-radius: 6px; font-weight: 800; text-decoration: none; }
 .social-icon { display: grid; place-items: center; }
-.cta-card h2[tabindex="-1"]:focus { outline: none; }
+.dm-title[tabindex="-1"]:focus { outline: none; }
 .hp { position: absolute; left: -10000px; width: 1px; height: 1px; opacity: 0; }
 .how { margin: 32px 0 0; }
 .steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr; gap: 16px; }
