@@ -32,6 +32,8 @@ export class ApiFailure extends Error {
 
 export interface ClientApi {
   me(): Promise<Me>;
+  /** Ends the Session (clears the cookie); the code and its Rounds are untouched. */
+  logout(): Promise<void>;
   redeem(req: RedeemRequest): Promise<Me>;
   addVoice(sample: Blob, filename: string): Promise<VoiceResponse>;
   deleteVoice(): Promise<VoiceResponse>;
@@ -87,6 +89,9 @@ export function httpApi(fetchImpl: FetchLike = (i, init) => fetch(i, init)): Cli
 
   return {
     me: () => json<Me>("/api/me"),
+    logout: async () => {
+      await send("/api/logout", { method: "POST" });
+    },
     redeem: (req) => json<Me>("/api/redeem", post(req)),
     addVoice: (sample, filename) => {
       const form = new FormData();

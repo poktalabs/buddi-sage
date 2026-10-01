@@ -98,6 +98,15 @@ function renderHeader() {
   const right: Node[] = [];
   if (me) right.push(h("span", { class: "ds-badge" }, `Rounds left: ${roundsLeft()}`));
   if (me?.hasVoice) right.push(deleteVoiceControl());
+  if (me) {
+    right.push(
+      h(
+        "button",
+        { class: "ds-btn ds-btn-ghost", disabled: roundLive, title: roundLive ? "Available after this Round" : undefined, onClick: logOut },
+        "Log out",
+      ),
+    );
+  }
   if (!me) {
     const t = LANDING[lang];
     right.push(
@@ -112,11 +121,40 @@ function renderHeader() {
       h(
         "div",
         { class: "bar" },
-        h("div", { class: "brand" }, h("span", { class: "logo nb-sm" }, "B"), h("span", {}, "BUDDi Sage Mode")),
+        // Same as BUDDi's header: the logo is the home link and its tile presses in on hover.
+        h(
+          "a",
+          { class: "brand group", href: "/", onClick: goHome },
+          h("span", { class: "logo nb-sm nb-press-child" }, "B"),
+          h("span", {}, "BUDDi Sage Mode"),
+        ),
         h("div", { class: "bar-right" }, ...right),
       ),
     ),
   );
+}
+
+// Home is the landing page before a code, the next step after one. Never mid-Round: leaving
+// would drop the live call.
+function goHome(ev: Event) {
+  ev.preventDefault();
+  if (roundLive) return;
+  if (me) route();
+  else showLanding();
+}
+
+// Ends the Session and forgets this browser's per-code choice (skipped job), so the next code
+// starts clean. The language and the Story bank stay: they belong to the browser, not the code.
+async function logOut() {
+  if (roundLive) return;
+  try {
+    await api.logout();
+  } catch {
+    // The cookie may already be gone; the browser forgets the code either way.
+  }
+  me = null;
+  localStorage.removeItem(JOB_SKIP_KEY);
+  showLanding();
 }
 
 function deleteVoiceControl(): HTMLElement {

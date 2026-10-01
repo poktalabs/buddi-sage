@@ -7,7 +7,7 @@
 import type { Env, Session } from "./env";
 import { error } from "./http";
 import { readSession } from "./session";
-import { me, redeem } from "./routes/access";
+import { logout, me, redeem } from "./routes/access";
 import { createCodes } from "./routes/admin";
 import { addVoice, deleteVoice } from "./routes/voice";
 import { startRound } from "./routes/rounds";
@@ -30,6 +30,7 @@ type Route =
 // handler's scoped lookup rejects ids that are not the Guest's.
 const ROUTES: Route[] = [
   { method: "POST", pattern: /^\/api\/redeem$/, auth: "none", handler: redeem },
+  { method: "POST", pattern: /^\/api\/logout$/, auth: "none", handler: logout },
   { method: "GET", pattern: /^\/api\/me$/, auth: "session", handler: me },
   { method: "POST", pattern: /^\/admin\/codes$/, auth: "none", handler: createCodes },
   { method: "POST", pattern: /^\/api\/requests$/, auth: "none", handler: (r, e) => createCodeRequest(r, e) },

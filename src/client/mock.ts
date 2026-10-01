@@ -51,6 +51,10 @@ export function mockApi(delayMs = 350): ClientApi {
       requireSession();
       return me();
     },
+    async logout() {
+      await sleep(delayMs);
+      redeemed = false;
+    },
     async redeem(req) {
       await sleep(delayMs);
       const code = req.code.trim().toUpperCase();

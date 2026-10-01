@@ -66,6 +66,10 @@ button:disabled { cursor: not-allowed; }
 .nb-press { transition: transform 0.05s ease, box-shadow 0.05s ease; }
 .nb-press:hover  { transform: translate(-1px, -1px); box-shadow: 6px 6px 0 0 var(--color-ink); }
 .nb-press:active { transform: translate(3px, 3px);   box-shadow: 2px 2px 0 0 var(--color-ink); }
+/* The same press, driven by a parent .group link (the header logo), as in BUDDi. */
+.nb-press-child { transition: transform 0.05s ease, box-shadow 0.05s ease; }
+.group:hover > .nb-press-child  { transform: translate(-1px, -1px); box-shadow: 6px 6px 0 0 var(--color-ink); }
+.group:active > .nb-press-child { transform: translate(3px, 3px);   box-shadow: 2px 2px 0 0 var(--color-ink); }
 
 /* Uppercase eyebrow / label voice */
 .kicker { text-transform: uppercase; letter-spacing: 0.08em; font-weight: 800; font-size: 0.7rem; }
@@ -143,7 +147,7 @@ label { font-weight: 800; }
 .shell-footer { padding-top: 24px; padding-bottom: 24px; font-size: 0.75rem; font-weight: 600; color: var(--color-charcoal); }
 .bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 12px 0; }
 .bar-right { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
-.brand { display: flex; align-items: center; gap: 8px; font-size: 1.125rem; font-weight: 800; }
+.brand { display: flex; align-items: center; gap: 8px; font-size: 1.125rem; font-weight: 800; color: var(--color-ink); text-decoration: none; }
 .logo { display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 6px;
   background: var(--color-magenta); color: #fff; font-weight: 800; }
 .ds-note.mock-banner { margin: 12px 0 0; background: var(--color-gold); color: var(--color-ink); font-weight: 700; } /* caution: gold fill, ink text */

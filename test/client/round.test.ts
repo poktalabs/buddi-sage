@@ -15,6 +15,7 @@ const REPLAY: ReplayResponse = { status: "replayed", final_answer: "a", best_sel
 function fakeApi(overrides: Partial<ClientApi> = {}) {
   const api = {
     me: vi.fn(),
+    logout: vi.fn(),
     redeem: vi.fn(),
     addVoice: vi.fn(),
     deleteVoice: vi.fn(),

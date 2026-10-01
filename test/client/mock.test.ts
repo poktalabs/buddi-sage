@@ -34,6 +34,15 @@ describe("mock Worker", () => {
     await expect(api.startRound({ question_id: "why-this-role" })).rejects.toMatchObject({ code: "allowance_used" });
   });
 
+  it("logs out: the session ends until the next redeem", async () => {
+    const api = mockApi(0);
+    await api.redeem({ code: "X", contact: "a@b.co" });
+    await api.logout();
+    await expect(api.me()).rejects.toMatchObject({ code: "unauthorized" });
+    await api.redeem({ code: "X" });
+    await expect(api.me()).resolves.toMatchObject({ hasContact: true });
+  });
+
   it("gives an OWNER code the owner Allowance and deletes the voice", async () => {
     const api = mockApi(0);
     expect(await api.redeem({ code: "SAGE-OWNER", contact: "@mel" })).toMatchObject({ kind: "owner", allowance: 100 });
