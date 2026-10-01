@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 460" role="img" aria-label="Sage Mode: a coach meditating on a lily pad with gold markings over closed eyes, a toad meditating beside them, natural energy swirling in and a voice waveform flowing out">
-  <!-- BUDDi port-kit colours: ink #0a0a0a, panel #fff, paper-dark #fff0e8, violet #7c3aed, gold #ffb800, green #15803d. Magenta stays reserved for the call to action. Each solid shape is drawn twice: an ink copy offset 6px (the zero-blur shadow), then the fill. -->
+  <!-- BUDDi port-kit colours: ink #0a0a0a, panel #fff, paper-dark #fff0e8, violet #7c3aed, gold #ffb800, green #15803d. Magenta marks the energy: the swirls, the brow mark and the mudra points. Each solid shape is drawn twice: an ink copy offset 6px (the zero-blur shadow), then the fill. -->
   <defs>
     <circle id="sun" cx="270" cy="200" r="150"/>
     <path id="pad" d="M100 392 A170 32 0 1 1 440 392 A170 32 0 1 1 100 392 Z"/>
@@ -20,10 +20,10 @@
     <circle cx="270" cy="200" r="118" fill="none" stroke-width="2.5" stroke-dasharray="2 12"/>
 
     <!-- Natural energy swirls flowing in from both sides -->
-    <path d="M30 150 C70 70 170 80 150 140 C136 182 88 160 104 132 C114 116 136 124 130 138" fill="none" stroke="#7c3aed" stroke-width="7"/>
-    <path d="M150 140 C176 186 186 220 214 246" fill="none" stroke="#7c3aed" stroke-width="5" stroke-dasharray="1 12"/>
-    <path d="M494 250 C470 320 380 330 386 276 C390 240 432 246 426 270 C422 284 404 284 404 272" fill="none" stroke="#7c3aed" stroke-width="7"/>
-    <path d="M386 276 C366 270 346 262 328 252" fill="none" stroke="#7c3aed" stroke-width="5" stroke-dasharray="1 12"/>
+    <path d="M30 150 C70 70 170 80 150 140 C136 182 88 160 104 132 C114 116 136 124 130 138" fill="none" stroke="#c4177a" stroke-width="7"/>
+    <path d="M150 140 C176 186 186 220 214 246" fill="none" stroke="#c4177a" stroke-width="5" stroke-dasharray="1 12"/>
+    <path d="M494 250 C470 320 380 330 386 276 C390 240 432 246 426 270 C422 284 404 284 404 272" fill="none" stroke="#c4177a" stroke-width="7"/>
+    <path d="M386 276 C366 270 346 262 328 252" fill="none" stroke="#c4177a" stroke-width="5" stroke-dasharray="1 12"/>
 
     <!-- The voice going out: a waveform rising off the sun -->
     <path d="M346 70 l10 -18 l10 34 l10 -50 l10 64 l10 -46 l10 30 l10 -14" fill="none" stroke="#0a0a0a" stroke-width="5"/>
@@ -48,9 +48,9 @@
 
     <!-- Hands resting on the knees, thumb and finger touching -->
     <circle cx="186" cy="352" r="14" fill="#fff"/>
-    <circle cx="186" cy="352" r="4.5" fill="#ffb800" stroke-width="2.5"/>
+    <circle cx="186" cy="352" r="4.5" fill="#c4177a" stroke-width="2.5"/>
     <circle cx="354" cy="352" r="14" fill="#fff"/>
-    <circle cx="354" cy="352" r="4.5" fill="#ffb800" stroke-width="2.5"/>
+    <circle cx="354" cy="352" r="4.5" fill="#c4177a" stroke-width="2.5"/>
 
     <!-- Neck and head -->
     <rect x="256" y="196" width="28" height="22" fill="#fff"/>
@@ -65,7 +65,7 @@
     <!-- Sage markings: gold pigment over closed eyes, a mark on the brow -->
     <path d="M233 164 Q249 144 266 162 Q249 156 233 164 Z" fill="#ffb800" stroke-width="2.5"/>
     <path d="M274 162 Q291 144 307 164 Q291 156 274 162 Z" fill="#ffb800" stroke-width="2.5"/>
-    <path d="M270 134 L276 141 L270 148 L264 141 Z" fill="#ffb800" stroke-width="2.5"/>
+    <path d="M270 134 L276 141 L270 148 L264 141 Z" fill="#c4177a" stroke-width="2.5"/>
     <path d="M238 168 Q250 177 262 168" fill="none" stroke-width="4"/>
     <path d="M278 168 Q290 177 302 168" fill="none" stroke-width="4"/>
     <path d="M261 190 Q270 197 279 190" fill="none" stroke-width="3.5"/>

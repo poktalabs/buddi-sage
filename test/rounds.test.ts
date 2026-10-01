@@ -57,6 +57,12 @@ describe("startRound", () => {
       conversation_token: "conv-token-test",
       question: { id: "why-this-role", text: "Why this role, and why now?" },
       allowance_left: 2,
+      dynamic_variables: {
+        question_id: "why-this-role",
+        question_text: "Why this role, and why now?",
+        job_intro: "",
+        job_context: "No specific job. Ground the Pushback only in what the Guest said.",
+      },
     });
     expect(await used()).toBe(1);
     const [round] = await rounds();

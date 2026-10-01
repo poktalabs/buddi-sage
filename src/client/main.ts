@@ -1,5 +1,5 @@
 // The Sage Mode page: one screen at a time, in the order a Guest meets them.
-// Landing (code + Contact, or request a code), Consent, Voice sample, Question picker, Round, Replay, Next question.
+// Landing (code + Contact, or request a code), Target job, Consent, Voice sample, Question picker, Round, Replay, Next question.
 // Decisions encoded here:
 // - Consent comes before any recording, every time a Guest has no Voice clone. Consent
 //   is not stored anywhere, so a Guest who deletes their voice sees it again.
@@ -8,10 +8,13 @@
 //   would leave the Replay with no voice to speak in.
 // - The Replay audio is fetched once and played from an object URL (each fetch is a paid
 //   text to speech call).
+// - The target job comes first, because everything after it is about that job (BUDDi is
+//   job-first). It can be skipped; the fixed Question set is the fallback, and the picker
+//   keeps offering the job until the Guest adds one.
 // - Vanilla TypeScript and the BUDDi tokens (style.css); no framework, no dependency.
 import consentMd from "../../content/consent.md?raw";
 import readingScriptMd from "../../content/reading-script.md?raw";
-import type { Lang, Me, ReplayResponse, StartRoundResponse } from "../shared/api";
+import type { JobBrief, Lang, Me, ReplayResponse, StartRoundResponse } from "../shared/api";
 import { QUESTIONS, type Question } from "../shared/questions";
 import { ApiFailure, httpApi, type ClientApi } from "./api";
 import { failureMessage } from "./copy";
@@ -24,6 +27,8 @@ import { RoundFailure, runRound, type StartSession } from "./round";
 import { readStoryBank, saveToStoryBank } from "./storyBank";
 
 const MIN_SAMPLE_SECONDS = 60;
+const JOB_SKIP_KEY = "buddi-sage:job-skipped";
+const BUDDI_URL = "https://buddi.agentcamp.xyz/";
 const MAX_SAMPLE_SECONDS = 180;
 
 // ---------- tiny DOM helper ----------
@@ -93,6 +98,15 @@ function renderHeader() {
   const right: Node[] = [];
   if (me) right.push(h("span", { class: "ds-badge" }, `Rounds left: ${roundsLeft()}`));
   if (me?.hasVoice) right.push(deleteVoiceControl());
+  if (me) {
+    right.push(
+      h(
+        "button",
+        { class: "ds-btn ds-btn-ghost", disabled: roundLive, title: roundLive ? "Available after this Round" : undefined, onClick: logOut },
+        "Log out",
+      ),
+    );
+  }
   if (!me) {
     const t = LANDING[lang];
     right.push(
@@ -107,11 +121,40 @@ function renderHeader() {
       h(
         "div",
         { class: "bar" },
-        h("div", { class: "brand" }, h("span", { class: "logo nb-sm" }, "B"), h("span", {}, "BUDDi Sage Mode")),
+        // Same as BUDDi's header: the logo is the home link and its tile presses in on hover.
+        h(
+          "a",
+          { class: "brand group", href: "/", onClick: goHome },
+          h("span", { class: "logo nb-sm nb-press-child" }, "B"),
+          h("span", {}, "BUDDi"),
+        ),
         h("div", { class: "bar-right" }, ...right),
       ),
     ),
   );
+}
+
+// Home is the landing page before a code, the next step after one. Never mid-Round: leaving
+// would drop the live call.
+function goHome(ev: Event) {
+  ev.preventDefault();
+  if (roundLive) return;
+  if (me) route();
+  else showLanding();
+}
+
+// Ends the Session and forgets this browser's per-code choice (skipped job), so the next code
+// starts clean. The language and the Story bank stay: they belong to the browser, not the code.
+async function logOut() {
+  if (roundLive) return;
+  try {
+    await api.logout();
+  } catch {
+    // The cookie may already be gone; the browser forgets the code either way.
+  }
+  me = null;
+  localStorage.removeItem(JOB_SKIP_KEY);
+  showLanding();
 }
 
 function deleteVoiceControl(): HTMLElement {
@@ -189,13 +232,23 @@ async function boot() {
   }
 }
 
+function jobSkipped(): boolean {
+  return localStorage.getItem(JOB_SKIP_KEY) === "1";
+}
+
+function jobLabel(job: JobBrief): string {
+  return job.company ? `${job.role} at ${job.company}` : job.role;
+}
+
 function route() {
   if (!me) showLanding();
+  else if (!me.job && !jobSkipped()) showJob();
   else if (!me.hasVoice) showConsent();
   else showPicker();
 }
 
-// The landing page doubles as the code screen: both calls to action sit in the hero.
+// The landing page doubles as the code screen: both hero buttons open the same two-tab form in
+// a dialog, on the tab the visitor picked.
 function showLanding(message?: string) {
   const t = LANDING[lang];
 
@@ -265,13 +318,11 @@ function showLanding(message?: string) {
   );
   requestCard.replaceChildren(h("p", { class: "muted" }, t.request.blurb), requestForm);
 
-  // One card, two modes. A link with ?code= or an ended Session opens on "I have a code".
+  // One card, two modes. A link with ?code= or an ended Session opens the dialog on "I have a code".
   const fromLink = new URLSearchParams(location.search).get("code");
-  if (fromLink) {
-    code.value = fromLink.toUpperCase();
-    landingMode = "have";
-  }
-  if (message) landingMode = "have";
+  if (fromLink) code.value = fromLink.toUpperCase();
+  const openOnLoad = Boolean(fromLink || message);
+  if (openOnLoad) landingMode = "have";
   const haveCard = h("div", {}, codeForm);
   const panelBox = h("div", { class: "cta-panel", role: "tabpanel" });
   const tabs = (["request", "have"] as const).map((m) =>
@@ -285,6 +336,24 @@ function showLanding(message?: string) {
   };
   setMode(landingMode, false);
 
+  const closeBtn = h("button", { type: "button", class: "dialog-close ds-btn ds-btn-ghost", "aria-label": t.close, onClick: () => dialog.close() }, "\u00d7");
+  const dialog = h(
+    "dialog",
+    { class: "cta-dialog ds-card", "aria-label": t.ctaLabel },
+    closeBtn,
+    h("div", { class: "segmented nb-sm", role: "tablist", "aria-label": t.ctaLabel }, ...tabs),
+    panelBox,
+  ) as HTMLDialogElement;
+  // A click on the backdrop lands on the dialog element itself: close, like Escape does.
+  dialog.addEventListener("click", (ev) => {
+    if (ev.target === dialog) dialog.close();
+  });
+  const open = (m: "request" | "have") => {
+    setMode(m, false);
+    dialog.showModal();
+    (m === "request" ? handle : code).focus();
+  };
+
   mount(
     h(
       "div",
@@ -295,13 +364,15 @@ function showLanding(message?: string) {
         h(
           "div",
           { class: "hero-inner" },
+          h("h1", { tabIndex: -1 }, `${t.headline[0]} `, h("span", { class: "hero-mark" }, t.headline[1])),
+          h("p", { class: "tagline" }, ...t.tagline.flatMap((s, i) => (i === 0 ? [h("span", {}, s)] : [h("span", { class: "tagline-dot", "aria-hidden": "true" }, "\u2022"), h("span", {}, s)]))),
           h(
             "div",
-            { class: "hero-main" },
-            h("h1", { tabIndex: -1 }, `${t.headline[0]} `, h("span", { class: "hero-mark" }, t.headline[1])),
-            h("p", { class: "lede" }, t.lede),
-            h("div", { class: "ds-card cta" }, h("div", { class: "segmented nb-sm", role: "tablist", "aria-label": t.ctaLabel }, ...tabs), panelBox),
+            { class: "hero-ctas" },
+            h("button", { type: "button", class: "ds-btn ds-btn-ghost ds-btn-lg", "aria-haspopup": "dialog", onClick: () => open("request") }, t.toggleRequest),
+            h("button", { type: "button", class: "ds-btn ds-btn-primary ds-btn-lg", "aria-haspopup": "dialog", onClick: () => open("have") }, t.toggleHave),
           ),
+          h("p", { class: "cta-note" }, t.ctaNote),
           h("img", { class: "hero-art", src: "/sage-hero.svg", alt: "", width: 520, height: 460 }),
         ),
       ),
@@ -316,8 +387,10 @@ function showLanding(message?: string) {
         ),
       ),
       h("section", { class: "notes inset nb-sm" }, h("h2", {}, t.notesTitle), h("ul", {}, ...t.notes.map((n) => h("li", {}, n)))),
+      dialog,
     ),
   );
+  if (openOnLoad) open("have");
 }
 
 // After a request: where to DM Mel, one big icon per profile.
@@ -345,6 +418,72 @@ function applyLang() {
   if (lead) lead.textContent = LANDING[lang].footer;
 }
 
+// The target job: a link or the pasted post. `again` is a change from the picker, where
+// "back" returns to the picker instead of skipping the job.
+function showJob(again = false) {
+  const source = h("textarea", {
+    id: "job-source",
+    class: "ds-input job-source",
+    rows: 4,
+    maxLength: 20000,
+    required: true,
+    placeholder: "https://jobs.example.com/senior-ai-engineer, or paste the job post",
+  });
+  source.value = me?.jobSource ?? "";
+  const error = h("p", { class: "ds-note ds-note-error", role: "alert" });
+  const submit = h("button", { class: "ds-btn ds-btn-primary", type: "submit" }, "Use this job");
+  const back = h(
+    "button",
+    {
+      class: "ds-btn ds-btn-ghost",
+      type: "button",
+      onClick: () => {
+        if (again) return showPicker();
+        localStorage.setItem(JOB_SKIP_KEY, "1");
+        route();
+      },
+    },
+    again ? "Keep my current job" : "Skip: practice general Questions",
+  );
+  const form = h(
+    "form",
+    {
+      class: "stack",
+      onSubmit: async (ev: Event) => {
+        ev.preventDefault();
+        submit.disabled = back.disabled = true;
+        submit.textContent = "Reading the job...";
+        error.textContent = "";
+        try {
+          me = await api.setJob({ source: source.value });
+          localStorage.removeItem(JOB_SKIP_KEY);
+          route();
+        } catch (e) {
+          const c = codeOf(e);
+          if (c === "unauthorized") return showLanding(failureMessage(c));
+          error.textContent = failureMessage(c);
+          submit.disabled = back.disabled = false;
+          submit.textContent = "Use this job";
+          source.focus();
+        }
+      },
+    },
+    h("div", { class: "field" }, h("label", { for: "job-source" }, "Job link or job post"), source),
+    error,
+    h("div", { class: "actions" }, submit, back),
+  );
+
+  mount(
+    panel(
+      ...title(again ? "Your target job" : "Step 1 of 4: Your target job", "What job are you practicing for?"),
+      h("p", { class: "muted" }, "Paste a link to the job post, or the post itself. Sage asks you Questions for this exact role, and your Best-self answer keeps what the role needs."),
+      me?.jobSource && !me.job ? h("p", { class: "ds-note ds-note-info" }, "We filled in the job you sent with your code request.") : "",
+      form,
+      h("p", { class: "muted small" }, "Some sites, like LinkedIn, block links. If yours does, paste the text of the post."),
+    ),
+  );
+}
+
 function showConsent(notice?: string) {
   const box = h("input", { type: "checkbox", id: "consent" });
   const next = h("button", { class: "ds-btn ds-btn-primary", disabled: true, onClick: () => showVoice() }, "Continue to your Voice sample");
@@ -356,7 +495,7 @@ function showConsent(notice?: string) {
   mount(
     panel(
       notice ? h("p", { class: "ds-note ds-note-success", role: "status" }, notice) : "",
-      ...title("Step 1 of 3: Consent", "Your voice, your call"),
+      ...title("Step 2 of 4: Consent", "Your voice, your call"),
       body,
       h("label", { class: "check inset nb-sm", for: "consent" }, box, h("span", {}, "This is my own voice and I consent to cloning it")),
       next,
@@ -489,7 +628,7 @@ function showVoice() {
 
   mount(
     panel(
-      ...title("Step 2 of 3: Voice sample", "Read this aloud"),
+      ...title("Step 3 of 4: Voice sample", "Read this aloud"),
       h("p", { class: "muted" }, "Your Voice sample makes the Voice clone that speaks your Replay. Sage keeps its own voice."),
       script,
       h("div", { class: "recorder inset nb-sm" }, timer, nudge, preview, controls, error),
@@ -497,33 +636,57 @@ function showVoice() {
   );
 }
 
+function questionList(questions: Question[], left: number): HTMLElement {
+  const bank = readStoryBank(localStorage);
+  const saved = (q: Question) => bank.some((e) => e.question_id === q.id && (!e.question_text || e.question_text === q.text));
+  return h(
+    "ul",
+    { class: "questions" },
+    ...questions.map((q) =>
+      h(
+        "li",
+        {},
+        h(
+          "button",
+          { class: "question nb nb-press", disabled: left <= 0, onClick: () => showRound(q) },
+          h("span", { class: "reading" }, q.text),
+          saved(q) ? h("span", { class: "ds-badge ds-badge-success" }, "In your Story bank") : "",
+        ),
+      ),
+    ),
+  );
+}
+
 function showPicker(notice?: string) {
   const left = roundsLeft();
-  const saved = new Set(readStoryBank(localStorage).map((e) => e.question_id));
-  const pick = (q: Question) => showRound(q);
+  const job = me?.job ?? null;
+
+  const jobPanel = job
+    ? h(
+        "div",
+        { class: "job-card inset nb-sm" },
+        h("p", { class: "kicker" }, "Practicing for"),
+        h("p", { class: "job-title" }, jobLabel(job)),
+        h("ul", { class: "needs", "aria-label": "What this role needs" }, ...job.needs.map((n) => h("li", { class: "ds-badge" }, n))),
+        h("button", { class: "ds-btn ds-btn-ghost", onClick: () => showJob(true) }, "Change job"),
+      )
+    : h(
+        "div",
+        { class: "job-card inset nb-sm" },
+        h("p", { class: "job-title" }, "Practicing for a specific job?"),
+        h("p", { class: "muted" }, "Add it and Sage asks Questions for that exact role."),
+        h("button", { class: "ds-btn ds-btn-violet", onClick: () => showJob(true) }, "Add your target job"),
+      );
 
   mount(
     panel(
       notice ? h("p", { class: "ds-note ds-note-success", role: "status" }, notice) : "",
-      ...title("Step 3 of 3: Pick a Question", "What should Sage ask you?"),
+      ...title("Step 4 of 4: Pick a Question", job ? "Which Question should Sage ask?" : "What should Sage ask you?"),
+      jobPanel,
       h("p", { class: "muted" }, "Sage asks the Question, listens to your Answer, pushes back once, then you answer again. Each Question you practice uses one Round."),
       left <= 0 ? h("p", { class: "ds-note ds-note-error", role: "alert" }, failureMessage("allowance_used")) : "",
-      h(
-        "ul",
-        { class: "questions" },
-        ...QUESTIONS.map((q) =>
-          h(
-            "li",
-            {},
-            h(
-              "button",
-              { class: "question nb nb-press", disabled: left <= 0, onClick: () => pick(q) },
-              h("span", { class: "reading" }, q.text),
-              saved.has(q.id) ? h("span", { class: "ds-badge ds-badge-success" }, "In your Story bank") : "",
-            ),
-          ),
-        ),
-      ),
+      questionList(job ? job.questions : QUESTIONS, left),
+      job ? h("details", { class: "said inset nb-sm general" }, h("summary", {}, "General Questions"), questionList(QUESTIONS, left)) : "",
       h("p", { class: "muted small" }, "Sage talks with you out loud: use headphones if you can, and find a quiet spot."),
     ),
   );
@@ -611,6 +774,7 @@ async function showRoundProblem(code: string, spent: boolean) {
 function showReplay(question: { id: string; text: string }, replay: ReplayResponse) {
   saveToStoryBank(localStorage, {
     question_id: question.id,
+    question_text: question.text,
     final_answer: replay.final_answer,
     best_self_text: replay.best_self_text,
     saved_at: new Date().toISOString(),
@@ -646,6 +810,7 @@ function showReplay(question: { id: string; text: string }, replay: ReplayRespon
       h("p", { class: "ds-card ds-card-violet best-self" }, replay.best_self_text),
       h("details", { class: "said inset nb-sm" }, h("summary", {}, "What you said"), h("p", { class: "reading" }, replay.final_answer)),
       h("p", { class: "muted small" }, "Saved to your Story bank on this device."),
+      buddiHandoff(),
       h(
         "button",
         {
@@ -665,6 +830,43 @@ function showReplay(question: { id: string; text: string }, replay: ReplayRespon
     ),
   );
   void load();
+}
+
+// After the Replay: the rest of the job-readiness loop lives in BUDDi. BUDDi cannot take a job
+// from a link parameter yet, so a linked job is offered as one tap to copy for its link box.
+function buddiHandoff(): HTMLElement {
+  const job = me?.job ?? null;
+  const link = me?.jobSource && /^https?:\/\/\S+$/i.test(me.jobSource.trim()) ? me.jobSource.trim() : null;
+  const copied = h("p", { class: "small", role: "status" });
+  return h(
+    "section",
+    { class: "ds-card ds-card-gold buddi-next" },
+    h("h2", {}, job ? `Keep preparing for ${jobLabel(job)}` : "Keep preparing in BUDDi"),
+    h("p", {}, "BUDDi takes the same job further: a resume tailored to it, a brief on the tech it uses, and a full mock interview with a scored report."),
+    h(
+      "div",
+      { class: "actions" },
+      h("a", { class: "ds-btn ds-btn-violet", href: BUDDI_URL, target: "_blank", rel: "noopener" }, "Open BUDDi"),
+      link
+        ? h(
+            "button",
+            {
+              class: "ds-btn ds-btn-ghost",
+              onClick: async () => {
+                try {
+                  await navigator.clipboard.writeText(link);
+                  copied.textContent = "Job link copied. Paste it in BUDDi under \"Paste a URL\".";
+                } catch {
+                  copied.textContent = link;
+                }
+              },
+            },
+            "Copy the job link",
+          )
+        : "",
+    ),
+    copied,
+  );
 }
 
 // ---------- start ----------

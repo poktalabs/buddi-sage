@@ -7,7 +7,7 @@
 import type { Env, Session } from "./env";
 import { error } from "./http";
 import { readSession } from "./session";
-import { me, redeem } from "./routes/access";
+import { logout, me, redeem } from "./routes/access";
 import { createCodes } from "./routes/admin";
 import { addVoice, deleteVoice } from "./routes/voice";
 import { startRound } from "./routes/rounds";
@@ -15,6 +15,7 @@ import { chatCompletions } from "./routes/llm";
 import { audio, replay } from "./routes/replay";
 import { createCodeRequest } from "./routes/requests";
 import { telegramWebhook } from "./routes/telegram";
+import { setJob } from "./routes/job";
 import { cleanupVoices } from "./cleanup";
 
 type Params = { id: string };
@@ -29,12 +30,14 @@ type Route =
 // handler's scoped lookup rejects ids that are not the Guest's.
 const ROUTES: Route[] = [
   { method: "POST", pattern: /^\/api\/redeem$/, auth: "none", handler: redeem },
+  { method: "POST", pattern: /^\/api\/logout$/, auth: "none", handler: logout },
   { method: "GET", pattern: /^\/api\/me$/, auth: "session", handler: me },
   { method: "POST", pattern: /^\/admin\/codes$/, auth: "none", handler: createCodes },
   { method: "POST", pattern: /^\/api\/requests$/, auth: "none", handler: (r, e) => createCodeRequest(r, e) },
   { method: "POST", pattern: /^\/telegram\/webhook$/, auth: "none", handler: telegramWebhook },
   { method: "POST", pattern: /^\/api\/voice$/, auth: "session", handler: addVoice },
   { method: "DELETE", pattern: /^\/api\/voice$/, auth: "session", handler: deleteVoice },
+  { method: "POST", pattern: /^\/api\/job$/, auth: "session", handler: setJob },
   { method: "POST", pattern: /^\/api\/rounds$/, auth: "session", handler: startRound },
   { method: "POST", pattern: /^\/api\/rounds\/(?<id>[^/]+)\/replay$/, auth: "session", handler: replay },
   { method: "GET", pattern: /^\/api\/rounds\/(?<id>[^/]+)\/audio$/, auth: "session", handler: audio },

@@ -8,12 +8,14 @@ const START: StartRoundResponse = {
   conversation_token: "tok",
   question: { id: "shipped-system", text: "Walk me through an AI system you shipped." },
   allowance_left: 2,
+  dynamic_variables: { question_id: "shipped-system", question_text: "Walk me through an AI system you shipped.", job_intro: "", job_context: "No specific job." },
 };
 const REPLAY: ReplayResponse = { status: "replayed", final_answer: "a", best_self_text: "b", audio_url: "/api/rounds/r1/audio" };
 
 function fakeApi(overrides: Partial<ClientApi> = {}) {
   const api = {
     me: vi.fn(),
+    logout: vi.fn(),
     redeem: vi.fn(),
     addVoice: vi.fn(),
     deleteVoice: vi.fn(),
@@ -21,6 +23,7 @@ function fakeApi(overrides: Partial<ClientApi> = {}) {
     replay: vi.fn(async () => REPLAY),
     fetchAudio: vi.fn(),
     requestCode: vi.fn(),
+    setJob: vi.fn(),
     ...overrides,
   };
   return api;
@@ -60,7 +63,7 @@ describe("runRound", () => {
     expect(api.startRound).toHaveBeenCalledWith({ question_id: "shipped-system" });
     expect(s.opts.conversationToken).toBe("tok");
     expect(s.opts.connectionType).toBe("webrtc");
-    expect(s.opts.dynamicVariables).toEqual({ question_id: "shipped-system", question_text: START.question.text });
+    expect(s.opts.dynamicVariables).toEqual(START.dynamic_variables);
     expect(Object.keys(s.opts)).not.toContain("overrides");
     s.opts.onDisconnect({ reason: "agent" });
     await expect(p).rejects.toEqual(new RoundFailure("ended_early"));

@@ -9,6 +9,7 @@ import { closeRequest, getCode, getCodeRequest, listPendingRequests, normaliseCo
 import { json } from "../http";
 import { requireHeader } from "../session";
 import { DEFAULT_ALLOWANCE, issueCodes, MAX_ALLOWANCE, MAX_COUNT } from "./admin";
+import { jobTitle, readBrief } from "../job";
 
 // Measured on the first three local Rounds (ElevenLabs conversation cost 747 to 1068 credits)
 // plus an estimate for the Replay speech. An estimate for /stats, not a bill.
@@ -111,7 +112,7 @@ async function run(cmd: string, args: string[], env: Env, origin: string): Promi
       if (request.status !== "pending") return `Request #${id} is already ${request.status}${request.code ? ` (${request.code})` : ""}.`;
       const kind = rounds === null ? "guest" : "gift";
       const who = `@${request.handle}`;
-      const codes = await issueCodes(env, { kind, allowance: rounds ?? undefined, note: `request #${id}`, contact: who });
+      const codes = await issueCodes(env, { kind, allowance: rounds ?? undefined, note: `request #${id}`, contact: who, job: request.job });
       if (!codes) return `Usage: /approve <id> [rounds 1-${MAX_ALLOWANCE}]`;
       const code = codes[0]!;
       if (!(await closeRequest(env.DB, id, "approved", code))) return `Request #${id} was closed meanwhile; ${code} was issued anyway.`;
@@ -133,6 +134,7 @@ async function run(cmd: string, args: string[], env: Env, origin: string): Promi
         `${row.code} (${row.kind})`,
         `Rounds: ${row.used} of ${row.allowance} used`,
         `Contact: ${row.contact ?? "none yet"}`,
+        `Job: ${row.job_brief ? jobTitle(readBrief(row.job_brief)!) : row.job_source ? `${row.job_source.slice(0, 80)} (not read yet)` : "none"}`,
         `Voice clone: ${row.voice_id ? "yes" : "no"}`,
         row.note ? `Note: ${row.note}` : "",
         `Created: ${row.created_at.slice(0, 16).replace("T", " ")}`,

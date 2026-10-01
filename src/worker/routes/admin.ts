@@ -4,7 +4,7 @@
 // code has no default because its Allowance is chosen for one specific person.
 import type { AdminCreateCodesRequest, AdminCreateCodesResponse, CodeKind } from "../../shared/api";
 import type { Env } from "../env";
-import { createCodes as insertCodes, setContact } from "../db";
+import { createCodes as insertCodes, setContact, setJobSource } from "../db";
 import { error, json, readJsonObject } from "../http";
 import { requireBearer } from "../session";
 
@@ -20,10 +20,11 @@ function isIntIn(v: unknown, min: number, max: number): v is number {
 /**
  * Validates and inserts codes; null when the arguments break a limit. `contact`, when given,
  * is stored on every new code so its Guest is not asked for one again (approved requests).
+ * `job`, when given, is the job the request named: it prefills the Guest's job screen.
  */
 export async function issueCodes(
   env: Env,
-  args: { kind: unknown; count?: unknown; allowance?: unknown; note?: unknown; contact?: string },
+  args: { kind: unknown; count?: unknown; allowance?: unknown; note?: unknown; contact?: string; job?: string | null },
 ): Promise<string[] | null> {
   const kind = args.kind;
   if (kind !== "guest" && kind !== "gift" && kind !== "owner") return null;
@@ -36,6 +37,7 @@ export async function issueCodes(
 
   const codes = await insertCodes(env.DB, { kind, count, allowance, note: (note as string | undefined) ?? null });
   if (args.contact) for (const c of codes) await setContact(env.DB, c, args.contact);
+  if (args.job) for (const c of codes) await setJobSource(env.DB, c, args.job);
   return codes;
 }
 

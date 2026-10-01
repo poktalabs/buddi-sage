@@ -44,6 +44,11 @@ export async function sessionCookie(code: string, secret: string): Promise<strin
   return `${COOKIE_NAME}=${value}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${MAX_AGE_SECONDS}`;
 }
 
+/** The Set-Cookie header value that ends the Session: same attributes, empty value, expired. */
+export function clearSessionCookie(): string {
+  return `${COOKIE_NAME}=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0`;
+}
+
 function cookieValue(req: Request, name: string): string | null {
   const header = req.headers.get("cookie");
   if (!header) return null;

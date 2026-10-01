@@ -6,7 +6,8 @@ import type { Me, RedeemRequest } from "../../shared/api";
 import type { Env, Session } from "../env";
 import { getCode, normaliseCode, setContact, type CodeRow } from "../db";
 import { error, json, readJsonObject } from "../http";
-import { sessionCookie } from "../session";
+import { readBrief } from "../job";
+import { clearSessionCookie, sessionCookie } from "../session";
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const X_HANDLE = /^@[A-Za-z0-9_]{1,15}$/;
@@ -26,6 +27,8 @@ export function toMe(row: CodeRow): Me {
     used: row.used,
     hasContact: row.contact !== null,
     hasVoice: row.voice_id !== null,
+    job: readBrief(row.job_brief),
+    jobSource: row.job_source,
   };
 }
 
@@ -50,6 +53,11 @@ export async function redeem(req: Request, env: Env): Promise<Response> {
   }
 
   return json(toMe(row), 200, { "set-cookie": await sessionCookie(row.code, env.SESSION_SECRET) });
+}
+
+/** Ends the Session. Needs no valid cookie, so a stale or tampered one can always be cleared. */
+export async function logout(): Promise<Response> {
+  return json({ ok: true }, 200, { "set-cookie": clearSessionCookie() });
 }
 
 export async function me(_req: Request, env: Env, session: Session): Promise<Response> {

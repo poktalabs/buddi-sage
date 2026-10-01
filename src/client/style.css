@@ -66,6 +66,10 @@ button:disabled { cursor: not-allowed; }
 .nb-press { transition: transform 0.05s ease, box-shadow 0.05s ease; }
 .nb-press:hover  { transform: translate(-1px, -1px); box-shadow: 6px 6px 0 0 var(--color-ink); }
 .nb-press:active { transform: translate(3px, 3px);   box-shadow: 2px 2px 0 0 var(--color-ink); }
+/* The same press, driven by a parent .group link (the header logo), as in BUDDi. */
+.nb-press-child { transition: transform 0.05s ease, box-shadow 0.05s ease; }
+.group:hover > .nb-press-child  { transform: translate(-1px, -1px); box-shadow: 6px 6px 0 0 var(--color-ink); }
+.group:active > .nb-press-child { transform: translate(3px, 3px);   box-shadow: 2px 2px 0 0 var(--color-ink); }
 
 /* Uppercase eyebrow / label voice */
 .kicker { text-transform: uppercase; letter-spacing: 0.08em; font-weight: 800; font-size: 0.7rem; }
@@ -143,7 +147,7 @@ label { font-weight: 800; }
 .shell-footer { padding-top: 24px; padding-bottom: 24px; font-size: 0.75rem; font-weight: 600; color: var(--color-charcoal); }
 .bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 12px 0; }
 .bar-right { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
-.brand { display: flex; align-items: center; gap: 8px; font-size: 1.125rem; font-weight: 800; }
+.brand { display: flex; align-items: center; gap: 8px; font-size: 1.125rem; font-weight: 800; color: var(--color-ink); text-decoration: none; }
 .logo { display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 6px;
   background: var(--color-magenta); color: #fff; font-weight: 800; }
 .ds-note.mock-banner { margin: 12px 0 0; background: var(--color-gold); color: var(--color-ink); font-weight: 700; } /* caution: gold fill, ink text */
@@ -208,25 +212,39 @@ audio { width: 100%; margin: 0 0 12px; }
 .is-landing .column { max-width: 68rem; }
 html:has(.is-landing) { overflow-x: clip; } /* the band is 100vw wide; never let a scrollbar make it scroll */
 .landing { padding: 0; }
-/* Hero: "Enter Sage Mode." with Sage meditating beside it. The band breaks out of the column and
-   inverts the page texture (light dots on the darker paper). On a phone Sage sits on top, kept
-   short so the call-to-action card still starts in the first screen. */
+/* Hero: one centered column. "Enter Sage Mode", the three actions, the two buttons (they open the
+   form in a dialog), then Sage meditating. The band breaks out of the column and inverts the page
+   texture (light dots on the darker paper). */
 .hero { margin: -24px calc(50% - 50vw) 0; padding: 24px 0 40px; border-bottom: 3px solid var(--color-ink);
   background-color: var(--color-paper-dark); background-image: radial-gradient(var(--color-paper) 2px, transparent 2px); background-size: 22px 22px; }
-.hero-inner { max-width: 68rem; margin: 0 auto; padding: 0 16px; box-sizing: border-box; display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; }
-.hero-art { order: -1; width: 100%; max-width: 230px; height: auto; justify-self: center; }
-.hero h1 { font-size: clamp(2.75rem, 11vw, 4.75rem); font-weight: 800; line-height: 1.02; letter-spacing: -0.03em; margin: 0 0 24px; }
+.hero-inner { max-width: 68rem; margin: 0 auto; padding: 0 16px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.hero h1 { font-size: clamp(2.75rem, 11vw, 5.25rem); font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; margin: 0 0 20px; }
 .hero h1:focus { outline: none; }
 .hero-mark { display: inline-block; background: var(--color-gold); border: 3px solid var(--color-ink); box-shadow: 5px 5px 0 0 var(--color-ink);
-  border-radius: 8px; padding: 0 0.18em 0.04em; transform: rotate(-1.5deg); white-space: nowrap; }
-.lede { font-size: 1.125rem; line-height: 1.5; max-width: 30rem; margin: 0 0 24px; }
-@media (min-width: 880px) {
-  .hero { padding: 48px 0 64px; }
-  .hero-inner { grid-template-columns: minmax(0, 31rem) minmax(0, 1fr); column-gap: 48px; align-items: center; }
-  .hero-art { order: 0; max-width: 540px; justify-self: end; }
+  border-radius: 8px; padding: 0.06em 0.2em 0.16em; transform: rotate(-1.5deg); white-space: nowrap; }
+.tagline { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px 12px; margin: 0 0 28px;
+  font-size: clamp(1.05rem, 3.6vw, 1.375rem); font-weight: 700; }
+.tagline-dot { color: var(--color-magenta); font-size: 1.4em; line-height: 1; }
+/* A phone can't fit the three on one line: stack them, each led by its dot, so no dot dangles. */
+@media (max-width: 599px) {
+  .tagline { flex-direction: column; gap: 2px; }
+  .tagline-dot { display: none; }
+  .tagline > span:not(.tagline-dot)::before { content: "\2022"; color: var(--color-magenta); margin-right: 8px; }
 }
-/* The call-to-action card: a segmented toggle, then the active form. */
-.cta { margin: 0; max-width: 31rem; }
+.hero-ctas { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; }
+.ds-btn-lg { padding: 14px 28px; font-size: 1rem; }
+.hero-ctas .ds-btn-lg { min-width: 14rem; }
+.cta-note { margin: 16px 0 0; font-size: 0.875rem; font-weight: 600; color: var(--color-charcoal); }
+.hero-art { width: 100%; max-width: 440px; height: auto; margin-top: 32px; }
+@media (min-width: 880px) {
+  .hero { padding: 64px 0 56px; }
+  .hero-art { max-width: 520px; margin-top: 40px; }
+}
+/* The form dialog: the segmented toggle, then the active form. The page under it stays put. */
+html:has(.cta-dialog[open]) { overflow: hidden; }
+.cta-dialog { width: min(31rem, calc(100vw - 32px)); max-height: calc(100dvh - 32px); box-sizing: border-box; margin: auto; padding: 56px 20px 20px; overflow-y: auto; }
+.cta-dialog::backdrop { background: rgb(10 10 10 / 0.55); }
+.dialog-close { position: absolute; top: 12px; right: 12px; padding: 0 10px; font-size: 1.25rem; line-height: 1.6; }
 .segmented { display: grid; grid-template-columns: 1fr 1fr; border-radius: 6px; overflow: hidden; margin: 0 0 20px; background: var(--color-panel); }
 .seg { border: 0; background: transparent; color: var(--color-ink); font: inherit; font-weight: 800; padding: 10px 12px; cursor: pointer; }
 .seg + .seg { border-left: 2px solid var(--color-ink); }
@@ -243,7 +261,8 @@ html:has(.is-landing) { overflow-x: clip; } /* the band is 100vw wide; never let
 .hp { position: absolute; left: -10000px; width: 1px; height: 1px; opacity: 0; }
 .how { margin: 40px 0 0; }
 .steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr; gap: 16px; }
-@media (min-width: 720px) { .steps { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 600px) { .steps { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 960px) { .steps { grid-template-columns: repeat(4, 1fr); } }
 .step { margin: 0; }
 .step h3 { margin: 10px 0 6px; }
 .step p { margin: 0; }
@@ -251,3 +270,23 @@ html:has(.is-landing) { overflow-x: clip; } /* the band is 100vw wide; never let
 .notes ul { margin: 0; padding-left: 1.2rem; }
 .notes li + li { margin-top: 6px; }
 .lang-toggle { padding: 4px 10px; }
+
+/* Target job: the job screen's textarea, the picker's "Practicing for" card, and the BUDDi
+   handoff after the Replay. */
+.job-source { resize: vertical; min-height: 6rem; font: inherit; line-height: 1.4; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.job-card { margin: 0 0 16px; padding: 14px 16px; background: var(--color-paper-dark); border-radius: 6px; }
+.job-card .kicker { margin: 0 0 2px; }
+.job-card .job-title { margin: 0 0 10px; font-size: 1.25rem; font-weight: 800; line-height: 1.25; }
+.job-card > .muted { margin: -4px 0 12px; }
+.needs { list-style: none; padding: 0; margin: 0 0 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+.needs .ds-badge { white-space: normal; line-height: 1.3; }
+.general { margin: 16px 0 0; }
+.general .questions { margin-top: 12px; }
+.buddi-next { margin: 24px 0 16px; }
+.buddi-next h2 { margin-top: 0; }
+.buddi-next p { margin: 0 0 14px; }
+.buddi-next .small { margin: 10px 0 0; }
+/* A closing hint under a form or list needs air above it. */
+.ds-card > p.small:last-child { margin-top: 16px; margin-bottom: 0; }
+a.ds-btn { text-decoration: none; }

@@ -54,9 +54,9 @@ export function replaceEmDashes(text: string): string {
   return text.replace(/\s*\u2014\s*/g, ", ").trim();
 }
 
-export async function bestSelfAnswer(input: { question: string; answer: string }, deps: RewriteDeps): Promise<RewriteResult> {
+export async function bestSelfAnswer(input: { question: string; answer: string; job?: string }, deps: RewriteDeps): Promise<RewriteResult> {
   const { system, addendum } = splitPrompt(deps.prompt ?? promptFile);
-  const vars = { question: input.question, answer: input.answer };
+  const vars = { question: input.question, answer: input.answer, job: input.job ?? "a general interview" };
   const failures: GuardFailure[] = [];
   let lastFailures: GuardFailure[] = [];
 

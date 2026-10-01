@@ -5,6 +5,8 @@ export interface Env {
   NEBIUS_API_BASE: string;
   COACH_MODEL: string;
   REWRITE_MODEL: string;
+  /** Reads a job post into a JobBrief; thinking off, so it answers in seconds. */
+  JOB_MODEL: string;
   TTS_MODEL: string;
   AGENT_ID: string;
   ELEVENLABS_API_KEY: string;

@@ -47,6 +47,16 @@ describe("router", () => {
     expect(await call(req(method, path, { cookie: "sage_session=SAGE-FAKE-FAKE.forged" }))).toEqual({ status: 401, error: "unauthorized" });
   });
 
+  it("POST /api/logout expires the session cookie, with or without a valid one", async () => {
+    for (const r of [req("POST", "/api/logout", { cookie }), req("POST", "/api/logout")]) {
+      const res = await handle(r, env);
+      expect(res.status).toBe(200);
+      const setCookie = res.headers.get("set-cookie") ?? "";
+      expect(setCookie.startsWith("sage_session=;")).toBe(true);
+      for (const attr of ["HttpOnly", "Secure", "SameSite=Lax", "Path=/", "Max-Age=0"]) expect(setCookie).toContain(attr);
+    }
+  });
+
   it("GET /api/me reaches the access handler with a valid cookie", async () => {
     const res = await handle(req("GET", "/api/me", { cookie }), env);
     expect(res.status).toBe(200);

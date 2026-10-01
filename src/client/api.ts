@@ -11,6 +11,7 @@ import type {
   RedeemRequest,
   ReplayRequest,
   ReplayResponse,
+  SetJobRequest,
   StartRoundRequest,
   StartRoundResponse,
   VoiceResponse,
@@ -31,9 +32,13 @@ export class ApiFailure extends Error {
 
 export interface ClientApi {
   me(): Promise<Me>;
+  /** Ends the Session (clears the cookie); the code and its Rounds are untouched. */
+  logout(): Promise<void>;
   redeem(req: RedeemRequest): Promise<Me>;
   addVoice(sample: Blob, filename: string): Promise<VoiceResponse>;
   deleteVoice(): Promise<VoiceResponse>;
+  /** Sets the target job from a link or pasted post; answers the updated Me. */
+  setJob(req: SetJobRequest): Promise<Me>;
   startRound(req: StartRoundRequest): Promise<StartRoundResponse>;
   replay(roundId: string, req: ReplayRequest): Promise<ReplayResponse>;
   /** Fetches Replay audio once. Each fetch is a paid text to speech call. */
@@ -84,6 +89,9 @@ export function httpApi(fetchImpl: FetchLike = (i, init) => fetch(i, init)): Cli
 
   return {
     me: () => json<Me>("/api/me"),
+    logout: async () => {
+      await send("/api/logout", { method: "POST" });
+    },
     redeem: (req) => json<Me>("/api/redeem", post(req)),
     addVoice: (sample, filename) => {
       const form = new FormData();
@@ -91,6 +99,7 @@ export function httpApi(fetchImpl: FetchLike = (i, init) => fetch(i, init)): Cli
       return json<VoiceResponse>("/api/voice", { method: "POST", body: form });
     },
     deleteVoice: () => json<VoiceResponse>("/api/voice", { method: "DELETE" }),
+    setJob: (req) => json<Me>("/api/job", post(req)),
     startRound: (req) => json<StartRoundResponse>("/api/rounds", post(req)),
     replay: (roundId, req) => json<ReplayResponse>(`/api/rounds/${encodeURIComponent(roundId)}/replay`, post(req)),
     fetchAudio: async (url) => (await send(url)).blob(),

@@ -9,7 +9,7 @@ describe("mock Worker", () => {
     await expect(api.redeem({ code: "SAGE-BAD1-0000" })).rejects.toMatchObject({ code: "invalid_code" });
     await expect(api.redeem({ code: "SAGE-AAAA-BBBB" })).rejects.toMatchObject({ code: "contact_required" });
     const me = await api.redeem({ code: "sage-aaaa-bbbb", contact: "@mel" });
-    expect(me).toEqual({ kind: "guest", allowance: 3, used: 0, hasContact: true, hasVoice: false });
+    expect(me).toEqual({ kind: "guest", allowance: 3, used: 0, hasContact: true, hasVoice: false, job: null, jobSource: null });
     await expect(api.startRound({ question_id: "shipped-system" })).rejects.toMatchObject({ code: "voice_required" });
     await expect(api.addVoice(new Blob(["x"]), "voice-sample.webm")).resolves.toEqual({ hasVoice: true });
     await expect(api.addVoice(new Blob(["x"]), "voice-sample.webm")).rejects.toMatchObject({ code: "voice_exists" });
@@ -34,6 +34,15 @@ describe("mock Worker", () => {
     await expect(api.startRound({ question_id: "why-this-role" })).rejects.toMatchObject({ code: "allowance_used" });
   });
 
+  it("logs out: the session ends until the next redeem", async () => {
+    const api = mockApi(0);
+    await api.redeem({ code: "X", contact: "a@b.co" });
+    await api.logout();
+    await expect(api.me()).rejects.toMatchObject({ code: "unauthorized" });
+    await api.redeem({ code: "X" });
+    await expect(api.me()).resolves.toMatchObject({ hasContact: true });
+  });
+
   it("gives an OWNER code the owner Allowance and deletes the voice", async () => {
     const api = mockApi(0);
     expect(await api.redeem({ code: "SAGE-OWNER", contact: "@mel" })).toMatchObject({ kind: "owner", allowance: 100 });
@@ -53,7 +62,7 @@ describe("mock Sage session", () => {
     const opts: SessionOptions = {
       conversationToken: "t",
       connectionType: "webrtc",
-      dynamicVariables: { question_id: "q", question_text: "Q" },
+      dynamicVariables: { question_id: "q", question_text: "Q", job_intro: "", job_context: "No specific job." },
       clientTools: { save_answer: save },
       onModeChange: ({ mode }) => void modes.push(mode),
       onDisconnect,

@@ -5,13 +5,25 @@
 // separate chunk the real page never fetches.
 //
 // Mock codes: any code works; one containing "BAD" is invalid_code, one containing
-// "OWNER" gets an owner Allowance. The first redeem needs a Contact. The Question
+// "OWNER" gets an owner Allowance. Setting a job always yields MOCK_JOB. The first redeem needs a Contact. The Question
 // "why-this-role" answers with status fallback, so that copy can be seen. The canned
 // Best-self answer adds no fact the canned Answer lacks, like the real one must not.
-import type { CodeKind, Me, ReplayResponse, StartRoundResponse } from "../shared/api";
-import { findQuestion } from "../shared/questions";
+import type { CodeKind, JobBrief, Me, ReplayResponse, StartRoundResponse } from "../shared/api";
+import { resolveQuestion } from "../shared/questions";
 import { ApiFailure, type ClientApi } from "./api";
 import type { LiveSession, SessionOptions } from "./round";
+
+// The job any link or text becomes in mock mode (a link containing "blocked" fails instead).
+const MOCK_JOB: JobBrief = {
+  role: "Senior AI Engineer",
+  company: "Acme",
+  needs: ["Ship LLM features to production", "Evaluate and monitor model quality", "Own on-call for AI services"],
+  questions: [
+    { id: "job-1", text: "Walk me through an LLM feature you took to production. What was your part in it?" },
+    { id: "job-2", text: "Tell me about a time you caught a drop in model quality. How did you notice, and what did you do?" },
+    { id: "job-3", text: "Tell me about an incident you handled on call. What happened, and what changed after?" },
+  ],
+};
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
@@ -24,9 +36,11 @@ export function mockApi(delayMs = 350): ClientApi {
   let kind: CodeKind = "guest";
   let allowance = 3;
   let used = 0;
+  let job: JobBrief | null = null;
+  let jobSource: string | null = null;
   const rounds = new Map<string, MockRound>();
 
-  const me = (): Me => ({ kind, allowance, used, hasContact, hasVoice });
+  const me = (): Me => ({ kind, allowance, used, hasContact, hasVoice, job, jobSource });
   const requireSession = () => {
     if (!redeemed) throw new ApiFailure(401, "unauthorized");
   };
@@ -36,6 +50,10 @@ export function mockApi(delayMs = 350): ClientApi {
       await sleep(delayMs);
       requireSession();
       return me();
+    },
+    async logout() {
+      await sleep(delayMs);
+      redeemed = false;
     },
     async redeem(req) {
       await sleep(delayMs);
@@ -65,6 +83,16 @@ export function mockApi(delayMs = 350): ClientApi {
       if (!/^@?[A-Za-z0-9._]{1,30}$/.test(req.handle.trim())) throw new ApiFailure(400, "bad_request");
       return { ok: true };
     },
+    async setJob(req) {
+      await sleep(delayMs * 4);
+      requireSession();
+      const source = req.source.trim();
+      if (!source) throw new ApiFailure(400, "bad_request");
+      if (source.includes("blocked")) throw new ApiFailure(422, "job_fetch_failed");
+      jobSource = source;
+      job = MOCK_JOB;
+      return me();
+    },
     async deleteVoice() {
       await sleep(delayMs);
       requireSession();
@@ -74,7 +102,7 @@ export function mockApi(delayMs = 350): ClientApi {
     async startRound(req): Promise<StartRoundResponse> {
       await sleep(delayMs);
       requireSession();
-      const question = findQuestion(req.question_id);
+      const question = resolveQuestion(req.question_id, job);
       if (!question) throw new ApiFailure(400, "unknown_question");
       if (!hasVoice) throw new ApiFailure(409, "voice_required");
       if (used >= allowance) throw new ApiFailure(403, "allowance_used");
@@ -86,6 +114,12 @@ export function mockApi(delayMs = 350): ClientApi {
         conversation_token: "mock-conversation-token",
         question: { id: question.id, text: question.text },
         allowance_left: allowance - used,
+        dynamic_variables: {
+          question_id: question.id,
+          question_text: question.text,
+          job_intro: job ? `Today we're practicing for the ${job.role} role. ` : "",
+          job_context: job ? `Role: ${job.role}.` : "No specific job.",
+        },
       };
     },
     async replay(roundId): Promise<ReplayResponse> {

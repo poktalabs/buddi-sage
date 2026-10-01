@@ -9,7 +9,14 @@ import type { Env } from "./env";
 import { type FetchImpl, UpstreamError, upstreamError } from "./eleven";
 
 export type ChatMessage = { role: "system" | "user" | "assistant"; content: string };
-export type ChatTextArgs = { model: string; messages: ChatMessage[]; temperature?: number; max_tokens?: number };
+export type ChatTextArgs = {
+  model: string;
+  messages: ChatMessage[];
+  temperature?: number;
+  max_tokens?: number;
+  /** "none" turns thinking off on models that honour it (the job brief needs no reasoning). */
+  reasoning_effort?: "none";
+};
 
 function completionsUrl(env: Env): string {
   return `${env.NEBIUS_API_BASE.replace(/\/+$/, "")}/chat/completions`;
@@ -39,6 +46,7 @@ export async function chatText(env: Env, args: ChatTextArgs, fetchImpl: FetchImp
   const body: Record<string, unknown> = { model: args.model, messages: args.messages, stream: false };
   if (args.temperature !== undefined) body.temperature = args.temperature;
   if (args.max_tokens !== undefined) body.max_tokens = args.max_tokens;
+  if (args.reasoning_effort !== undefined) body.reasoning_effort = args.reasoning_effort;
   const res = await fetchImpl(completionsUrl(env), {
     method: "POST",
     headers: { authorization: `Bearer ${env.NEBIUS_API_KEY}`, "content-type": "application/json" },

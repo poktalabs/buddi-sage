@@ -39,6 +39,15 @@ describe("httpApi", () => {
     expect(init.headers).toBeUndefined(); // the browser sets the multipart boundary
   });
 
+  it("POSTs /api/logout with no body", async () => {
+    const fetchImpl = vi.fn(async () => json(200, { ok: true }));
+    await expect(httpApi(fetchImpl).logout()).resolves.toBeUndefined();
+    const [url, init] = fetchImpl.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe("/api/logout");
+    expect(init.method).toBe("POST");
+    expect(init.body).toBeUndefined();
+  });
+
   it("DELETEs /api/voice", async () => {
     const fetchImpl = vi.fn(async () => json(200, { hasVoice: false }));
     await expect(httpApi(fetchImpl).deleteVoice()).resolves.toEqual({ hasVoice: false });

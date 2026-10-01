@@ -109,7 +109,7 @@ export async function runRound(args: RoundArgs): Promise<RoundResult> {
       session = await args.startSession({
         conversationToken: start.conversation_token,
         connectionType: "webrtc",
-        dynamicVariables: { question_id: start.question.id, question_text: start.question.text },
+        dynamicVariables: start.dynamic_variables,
         clientTools: {
           save_answer: () => {
             if (!saved) {
