@@ -12,6 +12,10 @@ export interface Env {
   LLM_PROXY_SECRET: string;
   SESSION_SECRET: string;
   ADMIN_SECRET: string;
+  // Telegram admin bot. All three optional: without them the bot and request pings are off.
+  TELEGRAM_BOT_TOKEN?: string;
+  TELEGRAM_WEBHOOK_SECRET?: string;
+  TELEGRAM_OWNER_ID?: string;
 }
 
 export type Session = { code: string };

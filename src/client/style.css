@@ -200,3 +200,25 @@ audio { width: 100%; margin: 0 0 12px; }
 .best-self { margin: 0 0 16px; font-size: 1rem; line-height: 1.5; }
 .said summary { font-weight: 800; }
 .said p { margin: 8px 0 0; }
+
+/* Landing: hero, the two calls to action side by side, how it works, notes. */
+.landing { padding: 8px 0 0; }
+.hero { margin: 8px 0 20px; }
+.hero h1 { font-size: 1.875rem; margin-bottom: 0.75rem; }
+.lede { max-width: 40rem; }
+.cta-grid { display: grid; grid-template-columns: 1fr; gap: 20px; align-items: start; }
+@media (min-width: 720px) { .cta-grid { grid-template-columns: 1fr 1fr; } }
+.cta-card { margin: 0; }
+.cta-card h2, .how h2, .notes h2 { margin-top: 0; }
+.hint { font-weight: 500; }
+.hp { position: absolute; left: -10000px; width: 1px; height: 1px; opacity: 0; }
+.how { margin: 32px 0 0; }
+.steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr; gap: 16px; }
+@media (min-width: 720px) { .steps { grid-template-columns: repeat(3, 1fr); } }
+.step { margin: 0; }
+.step h3 { margin: 10px 0 6px; }
+.step p { margin: 0; }
+.notes { margin: 24px 0 0; }
+.notes ul { margin: 0; padding-left: 1.2rem; }
+.notes li + li { margin-top: 6px; }
+.lang-toggle { padding: 4px 10px; }

@@ -41,5 +41,10 @@ export type AdminCreateCodesRequest = {
 };
 export type AdminCreateCodesResponse = { codes: string[] };
 
+// Landing page "Request a code" form. `website` is a honeypot: people leave it empty.
+export type Lang = "en" | "es";
+export type CodeRequestBody = { contact: string; goal?: string; lang?: Lang; website?: string };
+export type CodeRequestResponse = { ok: true };
+
 export const STORY_BANK_KEY = "buddi-sage:story-bank";
 export type StoryBankEntry = { question_id: string; final_answer: string; best_self_text: string; saved_at: string };

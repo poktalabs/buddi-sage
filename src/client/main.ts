@@ -1,5 +1,5 @@
 // The Sage Mode page: one screen at a time, in the order a Guest meets them.
-// Code + Contact, Consent, Voice sample, Question picker, Round, Replay, Next question.
+// Landing (code + Contact, or request a code), Consent, Voice sample, Question picker, Round, Replay, Next question.
 // Decisions encoded here:
 // - Consent comes before any recording, every time a Guest has no Voice clone. Consent
 //   is not stored anywhere, so a Guest who deletes their voice sees it again.
@@ -11,10 +11,11 @@
 // - Vanilla TypeScript and the BUDDi tokens (style.css); no framework, no dependency.
 import consentMd from "../../content/consent.md?raw";
 import readingScriptMd from "../../content/reading-script.md?raw";
-import type { Me, ReplayResponse, StartRoundResponse } from "../shared/api";
+import type { Lang, Me, ReplayResponse, StartRoundResponse } from "../shared/api";
 import { QUESTIONS, type Question } from "../shared/questions";
 import { ApiFailure, httpApi, type ClientApi } from "./api";
 import { failureMessage } from "./copy";
+import { initialLang, LANDING, LANG_KEY, landingFailure } from "./landing";
 import { renderMarkdown } from "./markdown";
 import { ensureMicrophone } from "./microphone";
 import { mockRequested } from "./mockMode";
@@ -68,6 +69,7 @@ let me: Me | null = null;
 let roundLive = false;
 let teardown: (() => void)[] = [];
 let activeRound: AbortController | null = null;
+let lang: Lang = initialLang(localStorage.getItem(LANG_KEY), navigator.languages ?? [navigator.language]);
 
 const header = document.getElementById("header")!;
 const main = document.getElementById("main")!;
@@ -88,6 +90,12 @@ function renderHeader() {
   const right: Node[] = [];
   if (me) right.push(h("span", { class: "ds-badge" }, `Rounds left: ${roundsLeft()}`));
   if (me?.hasVoice) right.push(deleteVoiceControl());
+  if (!me) {
+    const t = LANDING[lang];
+    right.push(
+      h("button", { class: "ds-btn ds-btn-ghost lang-toggle", "aria-label": t.toggleLabel, onClick: () => { setLang(lang === "en" ? "es" : "en"); showLanding(); } }, t.toggle),
+    );
+  }
   header.replaceChildren(
     h(
       "div",
@@ -171,7 +179,7 @@ async function boot() {
   showLoading();
   try {
     const current = await refreshMe();
-    if (!current) showCode();
+    if (!current) showLanding();
     else route();
   } catch (e) {
     showError(codeOf(e), boot);
@@ -179,18 +187,21 @@ async function boot() {
 }
 
 function route() {
-  if (!me) showCode();
+  if (!me) showLanding();
   else if (!me.hasVoice) showConsent();
   else showPicker();
 }
 
-function showCode(message?: string) {
-  const code = h("input", { id: "code", name: "code", autocomplete: "off", autocapitalize: "characters", required: true, placeholder: "SAGE-XXXX-XXXX", class: "ds-input" });
-  const contact = h("input", { id: "contact", name: "contact", autocomplete: "email", placeholder: "you@example.com or @handle", class: "ds-input" });
-  const error = h("p", { class: "ds-note ds-note-error", role: "alert" }, message ?? "");
-  const submit = h("button", { class: "ds-btn ds-btn-primary", type: "submit" }, "Continue");
+// The landing page doubles as the code screen: both calls to action sit in the hero.
+function showLanding(message?: string) {
+  const t = LANDING[lang];
 
-  const form = h(
+  // Have a code?
+  const code = h("input", { id: "code", name: "code", autocomplete: "off", autocapitalize: "characters", required: true, placeholder: "SAGE-XXXX-XXXX", class: "ds-input" });
+  const contact = h("input", { id: "contact", name: "contact", autocomplete: "email", placeholder: "you@example.com / @handle", class: "ds-input" });
+  const error = h("p", { class: "ds-note ds-note-error", role: "alert" }, message ?? "");
+  const submit = h("button", { class: "ds-btn ds-btn-primary", type: "submit" }, t.haveCode.submit);
+  const codeForm = h(
     "form",
     {
       class: "stack",
@@ -203,25 +214,86 @@ function showCode(message?: string) {
           route();
         } catch (e) {
           const c = codeOf(e);
-          error.textContent = failureMessage(c);
+          error.textContent = landingFailure(lang, c);
           (c === "contact_required" ? contact : code).focus();
           submit.disabled = false;
         }
       },
     },
-    h("div", { class: "field" }, h("label", { for: "code" }, "Your code"), code),
-    h("div", { class: "field" }, h("label", { for: "contact" }, "Email or X handle ", h("span", { class: "muted" }, "(needed the first time; used only to ask for your feedback)")), contact),
+    h("div", { class: "field" }, h("label", { for: "code" }, t.haveCode.code), code),
+    h("div", { class: "field" }, h("label", { for: "contact" }, `${t.haveCode.contact} `, h("span", { class: "muted hint" }, t.haveCode.contactHint)), contact),
     error,
     submit,
   );
 
+  // Request a code
+  const reqContact = h("input", { id: "req-contact", name: "contact", autocomplete: "email", required: true, placeholder: "you@example.com / @handle", class: "ds-input" });
+  const goal = h("input", { id: "req-goal", name: "goal", maxLength: 280, placeholder: t.request.goalPlaceholder, class: "ds-input" });
+  // Honeypot: hidden from people and screen readers, filled only by bots.
+  const website = h("input", { name: "website", tabIndex: -1, autocomplete: "off", "aria-hidden": "true", class: "hp" });
+  const reqError = h("p", { class: "ds-note ds-note-error", role: "alert" });
+  const reqSubmit = h("button", { class: "ds-btn ds-btn-violet", type: "submit" }, t.request.submit);
+  const requestCard = h("section", { class: "ds-card cta-card" });
+  const requestForm = h(
+    "form",
+    {
+      class: "stack",
+      onSubmit: async (ev: Event) => {
+        ev.preventDefault();
+        reqSubmit.disabled = true;
+        reqSubmit.textContent = t.request.sending;
+        reqError.textContent = "";
+        const who = reqContact.value.trim();
+        try {
+          await api.requestCode({ contact: who, goal: goal.value.trim() || undefined, lang, website: website.value });
+          requestCard.replaceChildren(h("h2", {}, t.request.title), h("p", { class: "ds-note ds-note-success", role: "status" }, t.request.done(who)));
+        } catch (e) {
+          reqError.textContent = landingFailure(lang, codeOf(e));
+          reqSubmit.disabled = false;
+          reqSubmit.textContent = t.request.submit;
+          reqContact.focus();
+        }
+      },
+    },
+    h("div", { class: "field" }, h("label", { for: "req-contact" }, t.request.contact), reqContact),
+    h("div", { class: "field" }, h("label", { for: "req-goal" }, t.request.goal), goal),
+    website,
+    reqError,
+    reqSubmit,
+  );
+  requestCard.replaceChildren(h("h2", {}, t.request.title), h("p", { class: "muted" }, t.request.blurb), requestForm);
+
   mount(
-    panel(
-      ...title("Welcome", "Practice one hard interview Question with Sage"),
-      h("p", { class: "reading" }, "Sage asks you a Question, pushes back once, and then you hear your own Answer as your Best-self answer, spoken in your own voice."),
-      form,
+    h(
+      "div",
+      { class: "landing" },
+      h("section", { class: "hero" }, h("p", { class: "kicker" }, t.kicker), h("h1", { tabIndex: -1 }, t.headline), h("p", { class: "reading lede" }, t.lede)),
+      h("div", { class: "cta-grid" }, h("section", { class: "ds-card cta-card" }, h("h2", {}, t.haveCode.title), codeForm), requestCard),
+      h(
+        "section",
+        { class: "how" },
+        h("h2", {}, t.howTitle),
+        h(
+          "ol",
+          { class: "steps" },
+          ...t.steps.map((s, i) => h("li", { class: "ds-card step" }, h("span", { class: "ds-badge ds-badge-gold step-num" }, String(i + 1)), h("h3", {}, s.title), h("p", {}, s.body))),
+        ),
+      ),
+      h("section", { class: "notes inset nb-sm" }, h("h2", {}, t.notesTitle), h("ul", {}, ...t.notes.map((n) => h("li", {}, n)))),
     ),
   );
+}
+
+function setLang(next: Lang) {
+  lang = next;
+  localStorage.setItem(LANG_KEY, next);
+  applyLang();
+}
+
+function applyLang() {
+  document.documentElement.lang = lang;
+  const lead = document.getElementById("footer-lead");
+  if (lead) lead.textContent = LANDING[lang].footer;
 }
 
 function showConsent(notice?: string) {
@@ -475,7 +547,7 @@ function finishRound(controller: AbortController) {
 
 async function showRoundProblem(code: string, spent: boolean) {
   await refreshMe().catch(() => null);
-  if (code === "unauthorized") return showCode(failureMessage(code));
+  if (code === "unauthorized") return showLanding(failureMessage(code));
   if (code === "voice_required") return route();
   mount(
     panel(
@@ -551,6 +623,7 @@ function showReplay(question: { id: string; text: string }, replay: ReplayRespon
 window.addEventListener("pagehide", () => activeRound?.abort());
 
 async function init() {
+  applyLang();
   if (mockRequested(location.search, location.hostname)) {
     const mock = await import("./mock");
     api = mock.mockApi();
