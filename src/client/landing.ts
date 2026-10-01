@@ -17,7 +17,11 @@ export type Social = "instagram" | "x" | "tiktok";
  * Mel's profiles, where requesters send their DM after the form. Only confirmed profiles are
  * listed; the "DM me" screen shows one icon per entry.
  */
-export const MEL_PROFILES: { network: Social; name: string; url: string }[] = [{ network: "x", name: "X", url: "https://x.com/thetokendad_" }];
+export const MEL_PROFILES: { network: Social; name: string; url: string }[] = [
+  { network: "instagram", name: "Instagram", url: "https://instagram.com/thetokendad" },
+  { network: "x", name: "X", url: "https://x.com/thetokendad_" },
+  { network: "tiktok", name: "TikTok", url: "https://www.tiktok.com/@thetokendad" },
+];
 
 // Simple line glyphs in the port-kit style (ink strokes), not the official logos.
 export const SOCIAL_ICONS: Record<Social, string> = {
