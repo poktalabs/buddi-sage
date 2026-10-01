@@ -8,6 +8,7 @@ import type { Env } from "../env";
 import { closeRequest, getCode, getCodeRequest, listPendingRequests, normaliseCode, readStats } from "../db";
 import { json } from "../http";
 import { requireHeader } from "../session";
+import { handleLabel, profileUrl } from "../social";
 import { DEFAULT_ALLOWANCE, issueCodes, MAX_ALLOWANCE, MAX_COUNT } from "./admin";
 
 // Measured on the first three local Rounds (ElevenLabs conversation cost 747 to 1068 credits)
@@ -87,7 +88,14 @@ async function run(cmd: string, args: string[], env: Env, origin: string): Promi
       const rows = await listPendingRequests(env.DB, 10);
       if (rows.length === 0) return "No pending requests.";
       return rows
-        .map((r) => [`#${r.id} ${r.contact} (${r.lang}) ${r.created_at.slice(0, 16).replace("T", " ")}`, r.goal ? `  For: ${r.goal}` : "", `  /approve_${r.id}   /dismiss_${r.id}`].filter(Boolean).join("\n"))
+        .map((r) =>
+          [
+            `#${r.id} ${handleLabel(r.platform, r.handle)} [${r.lang}] ${r.created_at.slice(0, 16).replace("T", " ")}`,
+            `  ${profileUrl(r.platform, r.handle)}`,
+            r.job_url ? `  Job: ${r.job_url}` : "",
+            `  /approve_${r.id}   /dismiss_${r.id}`,
+          ].filter(Boolean).join("\n"),
+        )
         .join("\n\n");
     }
 
@@ -99,12 +107,13 @@ async function run(cmd: string, args: string[], env: Env, origin: string): Promi
       if (!request) return `No request #${id}.`;
       if (request.status !== "pending") return `Request #${id} is already ${request.status}${request.code ? ` (${request.code})` : ""}.`;
       const kind = rounds === null ? "guest" : "gift";
-      const codes = await issueCodes(env, { kind, allowance: rounds ?? undefined, note: `request #${id}`, contact: request.contact });
+      const who = handleLabel(request.platform, request.handle);
+      const codes = await issueCodes(env, { kind, allowance: rounds ?? undefined, note: `request #${id}`, contact: who });
       if (!codes) return `Usage: /approve <id> [rounds 1-${MAX_ALLOWANCE}]`;
       const code = codes[0]!;
       if (!(await closeRequest(env.DB, id, "approved", code))) return `Request #${id} was closed meanwhile; ${code} was issued anyway.`;
       const allowance = rounds ?? DEFAULT_ALLOWANCE.guest!;
-      return [`Approved #${id}. Send this to ${request.contact}:`, "", inviteText(code, allowance, origin, request.lang)].join("\n");
+      return [`Approved #${id}. Reply to ${who}'s DM with:`, "", inviteText(code, allowance, origin, request.lang)].join("\n");
     }
 
     case "dismiss": {

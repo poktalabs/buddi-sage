@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { initialLang, LANDING, landingFailure } from "../../src/client/landing";
+import { dmTargets, initialLang, LANDING, landingFailure } from "../../src/client/landing";
 
 function allText(v: unknown): string[] {
   if (typeof v === "string") return [v];
-  if (typeof v === "function") return [String((v as (s: string) => string)("x@example.com"))];
+  if (typeof v === "function") return [String((v as (a: string, b: string) => string)("@ana (X)", "@buddi on X"))];
   if (Array.isArray(v)) return v.flatMap(allText);
   if (v && typeof v === "object") return Object.values(v).flatMap(allText);
   return [];
@@ -38,5 +38,12 @@ describe("landing copy", () => {
     expect(landingFailure("es", "invalid_code")).toMatch(/^Ese código/);
     expect(landingFailure("es", "something_new")).toBe(landingFailure("es", "bad_response"));
     expect(landingFailure("en", "rate_limited")).toMatch(/Too many requests/);
+  });
+});
+
+describe("DM targets", () => {
+  it("names where to send the DM in each language", () => {
+    expect(dmTargets("en")).toMatch(/^@\S+ on X/);
+    expect(dmTargets("es")).toMatch(/^@\S+ en X/);
   });
 });

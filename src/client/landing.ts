@@ -6,10 +6,24 @@
 //   the browser's language.
 // - Copy uses the glossary words (Round, Question, Answer, Voice clone, Best-self answer, Replay)
 //   and makes no claim the product does not back: the rewrite keeps the Guest's facts (guards.ts).
-import type { Lang } from "../shared/api";
+import type { Lang, SocialPlatform } from "../shared/api";
 import { failureMessage } from "./copy";
 
 export const LANG_KEY = "buddi-sage:lang";
+
+export const PLATFORM_NAMES: Record<SocialPlatform, string> = { instagram: "Instagram", x: "X", tiktok: "TikTok" };
+
+/**
+ * Where requesters send their DM. Only accounts Mel has confirmed are listed; a platform with
+ * no entry here is still accepted on the form, the copy just names fewer places to write.
+ */
+export const DM_ACCOUNTS: Partial<Record<SocialPlatform, string>> = { x: "thetokendad_" };
+
+/** "@thetokendad_ on X" or "@a on X or @b on Instagram". */
+export function dmTargets(lang: Lang): string {
+  const parts = Object.entries(DM_ACCOUNTS).map(([p, h]) => (lang === "es" ? `@${h} en ${PLATFORM_NAMES[p as SocialPlatform]}` : `@${h} on ${PLATFORM_NAMES[p as SocialPlatform]}`));
+  return parts.join(lang === "es" ? " o " : " or ");
+}
 
 export type LandingCopy = {
   toggle: string; // label of the button that switches to the other language
@@ -20,13 +34,13 @@ export type LandingCopy = {
   haveCode: { title: string; code: string; contact: string; contactHint: string; submit: string };
   request: {
     title: string;
-    blurb: string;
-    contact: string;
-    goal: string;
-    goalPlaceholder: string;
+    blurb: (targets: string) => string;
+    platform: string;
+    handle: string;
+    jobUrl: string;
     submit: string;
     sending: string;
-    done: (contact: string) => string;
+    done: (who: string, targets: string) => string;
   };
   howTitle: string;
   steps: { title: string; body: string }[];
@@ -51,13 +65,13 @@ export const LANDING: Record<Lang, LandingCopy> = {
     },
     request: {
       title: "Request a code",
-      blurb: "Sage Mode is invite-only for now, and codes are free. Tell us where to send yours.",
-      contact: "Email or X handle",
-      goal: "What are you preparing for? (optional)",
-      goalPlaceholder: "A backend interview next week",
+      blurb: (to) => `Codes are free while Sage Mode is invite-only. Tell us which account you will DM us from, then send a DM to ${to} and we will reply with your code.`,
+      platform: "Platform",
+      handle: "Your handle",
+      jobUrl: "Link to the job you are preparing for (optional)",
       submit: "Request a code",
       sending: "Sending...",
-      done: (c) => `Got it. We will send your code to ${c} soon.`,
+      done: (who, to) => `Got it. Now send a DM from ${who} to ${to} and we will reply with your code.`,
     },
     howTitle: "How it works",
     steps: [
@@ -88,13 +102,13 @@ export const LANDING: Record<Lang, LandingCopy> = {
     },
     request: {
       title: "Pide un código",
-      blurb: "Sage Mode es solo por invitación por ahora, y los códigos son gratis. Dinos a dónde enviarte el tuyo.",
-      contact: "Email o usuario de X",
-      goal: "¿Para qué te preparas? (opcional)",
-      goalPlaceholder: "Una entrevista de backend",
+      blurb: (to) => `Los códigos son gratis mientras Sage Mode es por invitación. Dinos desde qué cuenta nos vas a escribir, envía un DM a ${to} y te respondemos con tu código.`,
+      platform: "Plataforma",
+      handle: "Tu usuario",
+      jobUrl: "Enlace a la vacante para la que te preparas (opcional)",
       submit: "Pedir un código",
       sending: "Enviando...",
-      done: (c) => `Listo. Pronto enviaremos tu código a ${c}.`,
+      done: (who, to) => `Listo. Ahora envía un DM desde ${who} a ${to} y te respondemos con tu código.`,
     },
     howTitle: "Cómo funciona",
     steps: [
@@ -116,7 +130,7 @@ export const LANDING: Record<Lang, LandingCopy> = {
 const FAILURE_ES: Record<string, string> = {
   invalid_code: "Ese código no funciona. Revísalo e intenta de nuevo.",
   contact_required: "Agrega un email o usuario de X la primera vez que uses este código.",
-  bad_request: "Revisa los datos: el contacto debe ser un email o un usuario de X que empiece con @.",
+  bad_request: "Revisa los datos: el usuario debe existir en esa plataforma y el enlace debe ser una URL.",
   rate_limited: "Demasiadas solicitudes desde aquí. Intenta de nuevo en una hora.",
   unauthorized: "Tu sesión terminó. Escribe tu código otra vez para continuar.",
   upstream_error: "Un servicio del que dependemos no respondió. Intenta de nuevo en un momento.",

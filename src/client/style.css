@@ -29,6 +29,9 @@
   --color-info: #2563eb;       /* blue: neutral information / tips */
   --color-danger: #dc2626;     /* red: errors only, never the CTA */
   --color-disabled: #d6d2cc;   /* neutral gray for disabled controls, never a washed accent */
+  /* Sage Mode additions (not in the port kit): inputs sit on white cards, so they need their own fill. */
+  --color-field: #faf7f4;      /* input fill: warm off-white, distinct from the white card */
+  --color-placeholder: #8c857e; /* placeholder text: warm gray, clearly lighter than ink */
 }
 
 /* ===== Base styles (port kit, verbatim) ===== */
@@ -97,10 +100,10 @@ button:disabled { cursor: not-allowed; }
 .ds-card-gold    { background:var(--color-gold);    color:var(--color-ink); }
 
 /* Input: 2px ink border that shifts to accent on focus */
-.ds-input { width:100%; box-sizing:border-box; background:var(--color-panel); color:var(--color-ink);
+.ds-input { width:100%; box-sizing:border-box; background:var(--color-field); color:var(--color-ink);
   border:2px solid var(--color-ink); border-radius:6px; padding:8px 12px; font-size:0.875rem; outline:none; }
-.ds-input::placeholder { color:var(--color-charcoal); }
-.ds-input:focus { border-color:var(--color-magenta); }
+.ds-input::placeholder { color:var(--color-placeholder); opacity:1; }
+.ds-input:focus { border-color:var(--color-magenta); background:var(--color-panel); }
 .ds-input:focus-visible { outline:3px solid var(--color-ink); outline-offset:2px; }
 
 /* Status notes: one hue each, none borrows the accent */
@@ -218,6 +221,10 @@ audio { width: 100%; margin: 0 0 12px; }
 .cta-card { margin: 0; }
 .cta-card h2, .how h2, .notes h2 { margin-top: 0; }
 .hint { font-weight: 500; }
+.handle-row { display: grid; grid-template-columns: 8.5rem 1fr; gap: 12px; }
+select.ds-input { appearance: none; padding-right: 32px; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%230a0a0a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center; }
 .hp { position: absolute; left: -10000px; width: 1px; height: 1px; opacity: 0; }
 .how { margin: 32px 0 0; }
 .steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr; gap: 16px; }

@@ -4,7 +4,7 @@
 // Voice clone is only cleaned up an hour after the last Round started, so the hourly cron
 // cannot delete it between that Round's start and its Replay. Owner codes are never cleaned.
 // Timestamps written here are ISO 8601 UTC strings, which compare correctly as text.
-import type { CodeKind, Lang } from "../shared/api";
+import type { CodeKind, Lang, SocialPlatform } from "../shared/api";
 import type { GuardFailure } from "./guards";
 
 export type CodeRow = {
@@ -177,8 +177,9 @@ export type RequestStatus = "pending" | "approved" | "dismissed";
 
 export type CodeRequestRow = {
   id: number;
-  contact: string;
-  goal: string | null;
+  platform: SocialPlatform;
+  handle: string;
+  job_url: string | null;
   lang: Lang;
   status: RequestStatus;
   code: string | null;
@@ -188,11 +189,11 @@ export type CodeRequestRow = {
 
 export async function insertCodeRequest(
   db: D1Database,
-  args: { contact: string; goal: string | null; lang: Lang; ip_hash: string | null; now: Date },
+  args: { platform: SocialPlatform; handle: string; job_url: string | null; lang: Lang; ip_hash: string | null; now: Date },
 ): Promise<number> {
   const row = await db
-    .prepare("INSERT INTO code_requests (contact, goal, lang, ip_hash, created_at) VALUES (?, ?, ?, ?, ?) RETURNING id")
-    .bind(args.contact, args.goal, args.lang, args.ip_hash, args.now.toISOString())
+    .prepare("INSERT INTO code_requests (platform, handle, job_url, lang, ip_hash, created_at) VALUES (?, ?, ?, ?, ?, ?) RETURNING id")
+    .bind(args.platform, args.handle, args.job_url, args.lang, args.ip_hash, args.now.toISOString())
     .first<{ id: number }>();
   return row!.id;
 }
@@ -206,11 +207,11 @@ export async function countRequestsSince(db: D1Database, ipHash: string, since: 
   return row?.n ?? 0;
 }
 
-/** A pending request for this exact Contact, so a double submit does not ping Mel twice. */
-export async function findPendingRequest(db: D1Database, contact: string): Promise<CodeRequestRow | null> {
+/** A pending request for this handle, so a double submit does not ping Mel twice. */
+export async function findPendingRequest(db: D1Database, platform: SocialPlatform, handle: string): Promise<CodeRequestRow | null> {
   return db
-    .prepare("SELECT * FROM code_requests WHERE status = 'pending' AND lower(contact) = lower(?) LIMIT 1")
-    .bind(contact)
+    .prepare("SELECT * FROM code_requests WHERE status = 'pending' AND platform = ? AND lower(handle) = lower(?) LIMIT 1")
+    .bind(platform, handle)
     .first<CodeRequestRow>();
 }
 
