@@ -180,3 +180,7 @@ On Mel's "merge and deploy": `wave4/job-grounded` merged into `main` (`ab968ea`,
 ### 2026-10-01: platform tap on Get a code deployed
 
 On Mel's "merge and deploy": `wave5/request-platform` merged into `main` (`35c214c`, 314 tests, typecheck 0). The Get a code form shows the Instagram / X / TikTok logos once the handle has 3 valid characters; a tap opens Mel's profile there and sends the request with that platform (migration `0005_request_platform.sql`, applied remote); the Telegram ping, `/requests` and `/approve` read "@handle on Instagram". The I have a code contact accepts a handle with or without @ (stored as `@handle`). Deployed version `dd3d89b3-9258-4adf-84a2-3099416c0206`. Smoke: landing 200; an unknown platform answers 400 before anything is stored or pinged; `/api/me` and the unauthenticated webhook 401; in the browser the logos stay hidden at 2 characters and appear at 3, and the contact label reads "Email or @handle". No real request was sent.
+
+### 2026-10-01: share card deployed
+
+On Mel's "merge and deploy": `wave6/og-card` merged into `main` (`0357005`, 314 tests). `public/og.png` (1200x630, rendered from `og/og-card.html`: BUDDi logo, Enter Sage Mode, the three actions, "Try now at:" with the URL in a violet button, the hero art) plus Open Graph and Twitter meta tags in `index.html`. Deployed version `c17e6d5d-8583-48c4-9530-8a8e70a6d71e`. Smoke: `https://sage.agentcamp.xyz/og.png` answers 200 image/png (96,790 bytes) and the live page carries the `og:image` tag.
