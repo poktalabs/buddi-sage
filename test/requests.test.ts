@@ -42,11 +42,11 @@ describe("request fields", () => {
 describe("createCodeRequest", () => {
   it("stores a request and pings Mel with the profile link and job", async () => {
     const f = okFetch();
-    const res = await createCodeRequest(post({ handle: "@ana.dev", job: "https://jobs.example.com/1", lang: "es" }), env, f);
+    const res = await createCodeRequest(post({ handle: "@ana.dev", platform: "instagram", job: "https://jobs.example.com/1", lang: "es" }), env, f);
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ ok: true });
     const [row] = await listPendingRequests(env.DB, 10);
-    expect(row).toMatchObject({ handle: "ana.dev", job: "https://jobs.example.com/1", lang: "es", status: "pending" });
+    expect(row).toMatchObject({ handle: "ana.dev", platform: "instagram", job: "https://jobs.example.com/1", lang: "es", status: "pending" });
     expect(row!.ip_hash).toBeTruthy();
     expect(row!.ip_hash).not.toContain("203.0.113.7");
     expect(f).toHaveBeenCalledTimes(1);
@@ -54,9 +54,16 @@ describe("createCodeRequest", () => {
     expect(url).toBe("https://api.telegram.org/bottest-bot-token/sendMessage");
     const sent = JSON.parse(String(init.body)) as { chat_id: string; text: string };
     expect(sent.chat_id).toBe("42");
-    expect(sent.text).toContain("From: @ana.dev");
+    expect(sent.text).toContain("From: @ana.dev on Instagram");
     expect(sent.text).toContain("Job: https://jobs.example.com/1");
     expect(sent.text).toContain(`/approve_${row!.id}`);
+  });
+
+  it("keeps the platform optional but rejects an unknown one", async () => {
+    expect((await createCodeRequest(post({ handle: "no_tap" }), env, okFetch())).status).toBe(200);
+    expect((await createCodeRequest(post({ handle: "bad_tap", platform: "myspace" }), env, okFetch())).status).toBe(400);
+    const rows = await listPendingRequests(env.DB, 10);
+    expect(rows.map((r) => [r.handle, r.platform])).toEqual([["no_tap", null]]);
   });
 
   it("makes the job optional, takes a title, and defaults the language to English", async () => {

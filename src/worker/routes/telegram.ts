@@ -8,6 +8,7 @@ import type { Env } from "../env";
 import { closeRequest, getCode, getCodeRequest, listPendingRequests, normaliseCode, readStats } from "../db";
 import { json } from "../http";
 import { requireHeader } from "../session";
+import { handleLabel } from "../social";
 import { DEFAULT_ALLOWANCE, issueCodes, MAX_ALLOWANCE, MAX_COUNT } from "./admin";
 import { jobTitle, readBrief } from "../job";
 
@@ -95,7 +96,7 @@ async function run(cmd: string, args: string[], env: Env, origin: string): Promi
       return rows
         .map((r) =>
           [
-            `#${r.id} @${r.handle} [${r.lang}] ${r.created_at.slice(0, 16).replace("T", " ")}`,
+            `#${r.id} ${handleLabel(r.handle, r.platform)} [${r.lang}] ${r.created_at.slice(0, 16).replace("T", " ")}`,
             r.job ? `  Job: ${r.job}` : "",
             `  /approve_${r.id}   /dismiss_${r.id}`,
           ].filter(Boolean).join("\n"),
@@ -111,13 +112,13 @@ async function run(cmd: string, args: string[], env: Env, origin: string): Promi
       if (!request) return `No request #${id}.`;
       if (request.status !== "pending") return `Request #${id} is already ${request.status}${request.code ? ` (${request.code})` : ""}.`;
       const kind = rounds === null ? "guest" : "gift";
-      const who = `@${request.handle}`;
+      const who = handleLabel(request.handle, request.platform);
       const codes = await issueCodes(env, { kind, allowance: rounds ?? undefined, note: `request #${id}`, contact: who, job: request.job });
       if (!codes) return `Usage: /approve <id> [rounds 1-${MAX_ALLOWANCE}]`;
       const code = codes[0]!;
       if (!(await closeRequest(env.DB, id, "approved", code))) return `Request #${id} was closed meanwhile; ${code} was issued anyway.`;
       const allowance = rounds ?? DEFAULT_ALLOWANCE.guest!;
-      return [`Approved #${id}. Reply to ${who}'s DM with:`, "", inviteText(code, allowance, origin, request.lang)].join("\n");
+      return [`Approved #${id}. Reply to the DM from ${who} with:`, "", inviteText(code, allowance, origin, request.lang)].join("\n");
     }
 
     case "dismiss": {

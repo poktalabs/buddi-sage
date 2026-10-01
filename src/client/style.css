@@ -254,6 +254,8 @@ html:has(.cta-dialog[open]) { overflow: hidden; }
 .how h2, .notes h2 { margin-top: 0; }
 .hint { font-weight: 500; }
 .social-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 0 16px; }
+.platform-pick .social-row { margin: 0; }
+.pick-title { margin: 0 0 10px; font-weight: 800; }
 .social-link { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 84px; padding: 12px 14px;
   background: var(--color-panel); color: var(--color-ink); border-radius: 6px; font-weight: 800; text-decoration: none; }
 .social-icon { display: grid; place-items: center; }

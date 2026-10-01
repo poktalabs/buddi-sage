@@ -61,7 +61,10 @@ export type AdminCreateCodesResponse = { codes: string[] };
 // Landing page "Request a code" form: the social handle the requester will DM Mel from, and
 // optionally the job they are preparing for (a link or a title). `website` is a honeypot.
 export type Lang = "en" | "es";
-export type CodeRequestBody = { handle: string; job?: string; lang?: Lang; website?: string };
+/** Where a requester will DM Mel: the logo they tapped on the landing form. */
+export type Platform = "instagram" | "x" | "tiktok";
+export const PLATFORMS: readonly Platform[] = ["instagram", "x", "tiktok"];
+export type CodeRequestBody = { handle: string; platform?: Platform; job?: string; lang?: Lang; website?: string };
 export type CodeRequestResponse = { ok: true };
 
 export const STORY_BANK_KEY = "buddi-sage:story-bank";

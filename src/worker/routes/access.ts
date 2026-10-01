@@ -8,16 +8,21 @@ import { getCode, normaliseCode, setContact, type CodeRow } from "../db";
 import { error, json, readJsonObject } from "../http";
 import { readBrief } from "../job";
 import { clearSessionCookie, sessionCookie } from "../session";
+import { normaliseHandle } from "../social";
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const X_HANDLE = /^@[A-Za-z0-9_]{1,15}$/;
 const MAX_CONTACT_LENGTH = 254;
 
-/** A trimmed Contact if it looks like an email or an X handle (`@name`), else null. Loose on purpose. */
+/**
+ * A trimmed Contact if it looks like an email or a social handle, else null. Loose on purpose:
+ * the @ is optional and a handle is stored as `@name`, the same rule as the request form.
+ */
 export function normaliseContact(input: string): string | null {
   const c = input.trim();
   if (!c || c.length > MAX_CONTACT_LENGTH) return null;
-  return EMAIL.test(c) || X_HANDLE.test(c) ? c : null;
+  if (EMAIL.test(c)) return c;
+  const handle = normaliseHandle(c);
+  return handle ? `@${handle}` : null;
 }
 
 export function toMe(row: CodeRow): Me {

@@ -282,39 +282,61 @@ function showLanding(message?: string) {
     submit,
   );
 
-  // Request a code: their handle and, optionally, the job; then a "DM me" step.
+  // Get a code: optionally the job, then their handle. Once the handle has 3 characters the
+  // platform logos appear; a tap opens Mel's profile there (a real link, so no popup blocker)
+  // and sends the request with that platform, then shows the "DM me" step.
   const handle = h("input", { id: "req-handle", name: "handle", required: true, autocomplete: "off", autocapitalize: "none", spellcheck: false, placeholder: "@yourhandle", class: "ds-input" });
   const job = h("input", { id: "req-job", name: "job", maxLength: 300, placeholder: t.request.jobPlaceholder, class: "ds-input" });
   // Honeypot: hidden from people and screen readers, filled only by bots.
   const website = h("input", { name: "website", tabIndex: -1, autocomplete: "off", "aria-hidden": "true", class: "hp" });
   const reqError = h("p", { class: "ds-note ds-note-error", role: "alert" });
-  const reqSubmit = h("button", { class: "ds-btn ds-btn-violet", type: "submit" }, t.request.submit);
   const requestCard = h("div", {});
+  let sending = false;
+  const platformLinks = MEL_PROFILES.map((p) =>
+    socialLink(p, t.request.dmLabel(p.name), async () => {
+      if (sending) return;
+      sending = true;
+      reqError.textContent = t.request.sending;
+      reqError.classList.remove("ds-note-error");
+      const who = `@${bareHandle(handle.value)}`;
+      try {
+        await api.requestCode({ handle: handle.value, platform: p.network, job: job.value.trim() || undefined, lang, website: website.value });
+        showDmStep(requestCard, who, p);
+      } catch (e) {
+        reqError.classList.add("ds-note-error");
+        reqError.textContent = landingFailure(lang, codeOf(e));
+        sending = false;
+      }
+    }),
+  );
+  const picker = h("div", { class: "platform-pick", hidden: true }, h("p", { class: "pick-title" }, t.request.pick), h("div", { class: "social-row" }, ...platformLinks));
+  const syncPicker = () => {
+    const bare = bareHandle(handle.value);
+    const valid = HANDLE_SHAPE.test(bare);
+    picker.hidden = !(valid && bare.length >= 3);
+    if (!sending) {
+      reqError.classList.add("ds-note-error");
+      reqError.textContent = bare.length >= 3 && !valid ? t.request.handleRule : "";
+    }
+  };
+  handle.addEventListener("input", syncPicker);
   const requestForm = h(
     "form",
     {
       class: "stack",
-      onSubmit: async (ev: Event) => {
+      // Enter in a field moves on to the logos instead of submitting: the tap is the submit.
+      onSubmit: (ev: Event) => {
         ev.preventDefault();
-        reqSubmit.disabled = true;
-        reqSubmit.textContent = t.request.sending;
-        reqError.textContent = "";
-        try {
-          await api.requestCode({ handle: handle.value, job: job.value.trim() || undefined, lang, website: website.value });
-          showDmStep(requestCard, `@${handle.value.trim().replace(/^@/, "")}`);
-        } catch (e) {
-          reqError.textContent = landingFailure(lang, codeOf(e));
-          reqSubmit.disabled = false;
-          reqSubmit.textContent = t.request.submit;
-          handle.focus();
-        }
+        syncPicker();
+        if (!picker.hidden) platformLinks[0]?.focus();
+        else handle.focus();
       },
     },
-    h("div", { class: "field" }, h("label", { for: "req-handle" }, t.request.handle), handle),
     h("div", { class: "field" }, h("label", { for: "req-job" }, t.request.job), job),
+    h("div", { class: "field" }, h("label", { for: "req-handle" }, t.request.handle), handle),
     website,
+    picker,
     reqError,
-    reqSubmit,
   );
   requestCard.replaceChildren(h("p", { class: "muted" }, t.request.blurb), requestForm);
 
@@ -393,16 +415,33 @@ function showLanding(message?: string) {
   if (openOnLoad) open("have");
 }
 
-// After a request: where to DM Mel, one big icon per profile.
-function showDmStep(card: HTMLElement, who: string) {
+// The request form's handle rule, mirrored from the Worker (social.ts): a leading @ or a pasted
+// profile link is reduced to the bare handle.
+const HANDLE_SHAPE = /^[A-Za-z0-9._]{1,30}$/;
+function bareHandle(input: string): string {
+  const v = input.trim();
+  const fromUrl = /^(?:https?:\/\/)?(?:www\.)?(?:instagram\.com|x\.com|twitter\.com|tiktok\.com)\/@?([^/?#\s]+)/i.exec(v);
+  return (fromUrl ? fromUrl[1]! : v).replace(/^@/, "");
+}
+
+// One big icon link to Mel's profile on a platform. `onTap` runs alongside the navigation.
+function socialLink(p: (typeof MEL_PROFILES)[number], label: string, onTap?: () => void): HTMLAnchorElement {
+  const icon = h("span", { class: "social-icon" });
+  icon.innerHTML = SOCIAL_ICONS[p.network]; // static markup from landing.ts
+  return h("a", { class: "social-link nb-sm nb-press", href: p.url, target: "_blank", rel: "noopener", "aria-label": label, onClick: onTap }, icon, h("span", {}, p.name));
+}
+
+// After the tap: the request is in, and the DM is the last step. The same platform's link is
+// offered again in case the new tab did not open.
+function showDmStep(card: HTMLElement, who: string, p: (typeof MEL_PROFILES)[number]) {
   const t = LANDING[lang].request;
-  const links = MEL_PROFILES.map((p) => {
-    const icon = h("span", { class: "social-icon" });
-    icon.innerHTML = SOCIAL_ICONS[p.network]; // static markup from landing.ts
-    return h("a", { class: "social-link nb-sm nb-press", href: p.url, target: "_blank", rel: "noopener", "aria-label": t.dmLabel(p.name) }, icon, h("span", {}, p.name));
-  });
   const title = h("h2", { tabIndex: -1, class: "dm-title" }, t.dmTitle);
-  card.replaceChildren(title, h("p", { role: "status" }, t.dmBody(who)), h("div", { class: "social-row" }, ...links), h("p", { class: "muted small" }, t.dmNote));
+  card.replaceChildren(
+    title,
+    h("p", { role: "status" }, t.dmBody(who, p.name)),
+    h("div", { class: "social-row" }, socialLink(p, t.dmAgain(p.name))),
+    h("p", { class: "muted small" }, t.dmNote),
+  );
   title.focus();
 }
 

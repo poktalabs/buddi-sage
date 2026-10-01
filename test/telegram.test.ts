@@ -91,17 +91,17 @@ describe("telegram commands", () => {
 
   it("/requests lists pending requests; /approve issues a code with the Contact set and a ready message", async () => {
     expect(await say("/requests")).toBe("No pending requests.");
-    const id = await insertCodeRequest(env.DB, { handle: "ana.dev", job: "https://jobs.test/1", lang: "es", ip_hash: null, now: new Date() });
+    const id = await insertCodeRequest(env.DB, { handle: "ana.dev", platform: "tiktok", job: "https://jobs.test/1", lang: "es", ip_hash: null, now: new Date() });
     const list = await say("/requests");
-    expect(list).toContain(`#${id} @ana.dev [es]`);
+    expect(list).toContain(`#${id} @ana.dev on TikTok [es]`);
     expect(list).toContain("Job: https://jobs.test/1");
 
     const text = await say(`/approve_${id}`);
     const [code] = codesIn(text);
-    expect(text).toContain("Reply to @ana.dev's DM with:");
+    expect(text).toContain("Reply to the DM from @ana.dev on TikTok with:");
     expect(text).toContain("La práctica es en inglés");
     expect(text).toContain(`https://sage.test/?code=${code}`);
-    expect(await getCode(env.DB, code!)).toMatchObject({ kind: "guest", allowance: 3, contact: "@ana.dev", note: `request #${id}` });
+    expect(await getCode(env.DB, code!)).toMatchObject({ kind: "guest", allowance: 3, contact: "@ana.dev on TikTok", note: `request #${id}` });
     expect(await getCodeRequest(env.DB, id)).toMatchObject({ status: "approved", code });
 
     expect(await say(`/approve ${id}`)).toContain("already approved");
