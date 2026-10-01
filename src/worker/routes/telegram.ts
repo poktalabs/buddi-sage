@@ -8,7 +8,6 @@ import type { Env } from "../env";
 import { closeRequest, getCode, getCodeRequest, listPendingRequests, normaliseCode, readStats } from "../db";
 import { json } from "../http";
 import { requireHeader } from "../session";
-import { handleLabel, profileUrl } from "../social";
 import { DEFAULT_ALLOWANCE, issueCodes, MAX_ALLOWANCE, MAX_COUNT } from "./admin";
 
 // Measured on the first three local Rounds (ElevenLabs conversation cost 747 to 1068 credits)
@@ -90,9 +89,8 @@ async function run(cmd: string, args: string[], env: Env, origin: string): Promi
       return rows
         .map((r) =>
           [
-            `#${r.id} ${handleLabel(r.platform, r.handle)} [${r.lang}] ${r.created_at.slice(0, 16).replace("T", " ")}`,
-            `  ${profileUrl(r.platform, r.handle)}`,
-            r.job_url ? `  Job: ${r.job_url}` : "",
+            `#${r.id} @${r.handle} [${r.lang}] ${r.created_at.slice(0, 16).replace("T", " ")}`,
+            r.job ? `  Job: ${r.job}` : "",
             `  /approve_${r.id}   /dismiss_${r.id}`,
           ].filter(Boolean).join("\n"),
         )
@@ -107,7 +105,7 @@ async function run(cmd: string, args: string[], env: Env, origin: string): Promi
       if (!request) return `No request #${id}.`;
       if (request.status !== "pending") return `Request #${id} is already ${request.status}${request.code ? ` (${request.code})` : ""}.`;
       const kind = rounds === null ? "guest" : "gift";
-      const who = handleLabel(request.platform, request.handle);
+      const who = `@${request.handle}`;
       const codes = await issueCodes(env, { kind, allowance: rounds ?? undefined, note: `request #${id}`, contact: who });
       if (!codes) return `Usage: /approve <id> [rounds 1-${MAX_ALLOWANCE}]`;
       const code = codes[0]!;

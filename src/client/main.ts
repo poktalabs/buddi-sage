@@ -11,11 +11,11 @@
 // - Vanilla TypeScript and the BUDDi tokens (style.css); no framework, no dependency.
 import consentMd from "../../content/consent.md?raw";
 import readingScriptMd from "../../content/reading-script.md?raw";
-import { SOCIAL_PLATFORMS, type Lang, type Me, type ReplayResponse, type SocialPlatform, type StartRoundResponse } from "../shared/api";
+import type { Lang, Me, ReplayResponse, StartRoundResponse } from "../shared/api";
 import { QUESTIONS, type Question } from "../shared/questions";
 import { ApiFailure, httpApi, type ClientApi } from "./api";
 import { failureMessage } from "./copy";
-import { dmTargets, initialLang, LANDING, LANG_KEY, landingFailure, PLATFORM_NAMES } from "./landing";
+import { initialLang, LANDING, LANG_KEY, landingFailure, MEL_PROFILES, SOCIAL_ICONS } from "./landing";
 import { renderMarkdown } from "./markdown";
 import { ensureMicrophone } from "./microphone";
 import { mockRequested } from "./mockMode";
@@ -226,14 +226,9 @@ function showLanding(message?: string) {
     submit,
   );
 
-  // Request a code: the account they will DM from, and optionally the job.
-  const platform = h(
-    "select",
-    { id: "req-platform", name: "platform", class: "ds-input" },
-    ...SOCIAL_PLATFORMS.map((p) => h("option", { value: p }, PLATFORM_NAMES[p])),
-  );
+  // Request a code: their handle and, optionally, the job; then a "DM me" step.
   const handle = h("input", { id: "req-handle", name: "handle", required: true, autocomplete: "off", autocapitalize: "none", spellcheck: false, placeholder: "@yourhandle", class: "ds-input" });
-  const jobUrl = h("input", { id: "req-job", name: "job_url", type: "url", inputMode: "url", maxLength: 500, placeholder: "https://", class: "ds-input" });
+  const job = h("input", { id: "req-job", name: "job", maxLength: 300, placeholder: t.request.jobPlaceholder, class: "ds-input" });
   // Honeypot: hidden from people and screen readers, filled only by bots.
   const website = h("input", { name: "website", tabIndex: -1, autocomplete: "off", "aria-hidden": "true", class: "hp" });
   const reqError = h("p", { class: "ds-note ds-note-error", role: "alert" });
@@ -243,17 +238,14 @@ function showLanding(message?: string) {
     "form",
     {
       class: "stack",
-      noValidate: true,
       onSubmit: async (ev: Event) => {
         ev.preventDefault();
         reqSubmit.disabled = true;
         reqSubmit.textContent = t.request.sending;
         reqError.textContent = "";
-        const p = platform.value as SocialPlatform;
-        const who = `@${handle.value.trim().replace(/^@/, "")} (${PLATFORM_NAMES[p]})`;
         try {
-          await api.requestCode({ platform: p, handle: handle.value, job_url: jobUrl.value.trim() || undefined, lang, website: website.value });
-          requestCard.replaceChildren(h("h2", {}, t.request.title), h("p", { class: "ds-note ds-note-success", role: "status" }, t.request.done(who, dmTargets(lang))));
+          await api.requestCode({ handle: handle.value, job: job.value.trim() || undefined, lang, website: website.value });
+          showDmStep(requestCard, `@${handle.value.trim().replace(/^@/, "")}`);
         } catch (e) {
           reqError.textContent = landingFailure(lang, codeOf(e));
           reqSubmit.disabled = false;
@@ -262,18 +254,13 @@ function showLanding(message?: string) {
         }
       },
     },
-    h(
-      "div",
-      { class: "handle-row" },
-      h("div", { class: "field" }, h("label", { for: "req-platform" }, t.request.platform), platform),
-      h("div", { class: "field" }, h("label", { for: "req-handle" }, t.request.handle), handle),
-    ),
-    h("div", { class: "field" }, h("label", { for: "req-job" }, t.request.jobUrl), jobUrl),
+    h("div", { class: "field" }, h("label", { for: "req-handle" }, t.request.handle), handle),
+    h("div", { class: "field" }, h("label", { for: "req-job" }, t.request.job), job),
     website,
     reqError,
     reqSubmit,
   );
-  requestCard.replaceChildren(h("h2", {}, t.request.title), h("p", { class: "muted" }, t.request.blurb(dmTargets(lang))), requestForm);
+  requestCard.replaceChildren(h("h2", {}, t.request.title), h("p", { class: "muted" }, t.request.blurb), requestForm);
 
   mount(
     h(
@@ -300,6 +287,19 @@ function showLanding(message?: string) {
       h("section", { class: "notes inset nb-sm" }, h("h2", {}, t.notesTitle), h("ul", {}, ...t.notes.map((n) => h("li", {}, n)))),
     ),
   );
+}
+
+// After a request: where to DM Mel, one big icon per profile.
+function showDmStep(card: HTMLElement, who: string) {
+  const t = LANDING[lang].request;
+  const links = MEL_PROFILES.map((p) => {
+    const icon = h("span", { class: "social-icon" });
+    icon.innerHTML = SOCIAL_ICONS[p.network]; // static markup from landing.ts
+    return h("a", { class: "social-link nb-sm nb-press", href: p.url, target: "_blank", rel: "noopener", "aria-label": t.dmLabel(p.name) }, icon, h("span", {}, p.name));
+  });
+  const title = h("h2", { tabIndex: -1 }, t.dmTitle);
+  card.replaceChildren(title, h("p", { role: "status" }, t.dmBody(who)), h("div", { class: "social-row" }, ...links), h("p", { class: "muted small" }, t.dmNote));
+  title.focus();
 }
 
 function setLang(next: Lang) {

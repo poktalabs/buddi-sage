@@ -89,18 +89,17 @@ describe("telegram commands", () => {
 
   it("/requests lists pending requests; /approve issues a code with the Contact set and a ready message", async () => {
     expect(await say("/requests")).toBe("No pending requests.");
-    const id = await insertCodeRequest(env.DB, { platform: "instagram", handle: "ana.dev", job_url: "https://jobs.test/1", lang: "es", ip_hash: null, now: new Date() });
+    const id = await insertCodeRequest(env.DB, { handle: "ana.dev", job: "https://jobs.test/1", lang: "es", ip_hash: null, now: new Date() });
     const list = await say("/requests");
-    expect(list).toContain(`#${id} @ana.dev (Instagram) [es]`);
-    expect(list).toContain("https://instagram.com/ana.dev");
+    expect(list).toContain(`#${id} @ana.dev [es]`);
     expect(list).toContain("Job: https://jobs.test/1");
 
     const text = await say(`/approve_${id}`);
     const [code] = codesIn(text);
-    expect(text).toContain("Reply to @ana.dev (Instagram)'s DM with:");
+    expect(text).toContain("Reply to @ana.dev's DM with:");
     expect(text).toContain("La práctica es en inglés");
     expect(text).toContain("https://sage.test");
-    expect(await getCode(env.DB, code!)).toMatchObject({ kind: "guest", allowance: 3, contact: "@ana.dev (Instagram)", note: `request #${id}` });
+    expect(await getCode(env.DB, code!)).toMatchObject({ kind: "guest", allowance: 3, contact: "@ana.dev", note: `request #${id}` });
     expect(await getCodeRequest(env.DB, id)).toMatchObject({ status: "approved", code });
 
     expect(await say(`/approve ${id}`)).toContain("already approved");
@@ -108,14 +107,14 @@ describe("telegram commands", () => {
   });
 
   it("/approve with a Round count issues a Gift code", async () => {
-    const id = await insertCodeRequest(env.DB, { platform: "x", handle: "ana", job_url: null, lang: "en", ip_hash: null, now: new Date() });
+    const id = await insertCodeRequest(env.DB, { handle: "ana", job: null, lang: "en", ip_hash: null, now: new Date() });
     const [code] = codesIn(await say(`/approve ${id} 8`));
     expect(await getCode(env.DB, code!)).toMatchObject({ kind: "gift", allowance: 8 });
     expect(await say("/approve 999")).toBe("No request #999.");
   });
 
   it("/dismiss closes a request without a code", async () => {
-    const id = await insertCodeRequest(env.DB, { platform: "tiktok", handle: "spam.bot", job_url: null, lang: "en", ip_hash: null, now: new Date() });
+    const id = await insertCodeRequest(env.DB, { handle: "spam.bot", job: null, lang: "en", ip_hash: null, now: new Date() });
     expect(await say(`/dismiss_${id}`)).toBe(`Dismissed #${id}.`);
     expect(await getCodeRequest(env.DB, id)).toMatchObject({ status: "dismissed", code: null });
     expect(await say(`/dismiss_${id}`)).toContain("not pending");

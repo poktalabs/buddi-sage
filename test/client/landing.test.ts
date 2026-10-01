@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { dmTargets, initialLang, LANDING, landingFailure } from "../../src/client/landing";
+import { initialLang, LANDING, landingFailure, MEL_PROFILES, SOCIAL_ICONS } from "../../src/client/landing";
 
 function allText(v: unknown): string[] {
   if (typeof v === "string") return [v];
-  if (typeof v === "function") return [String((v as (a: string, b: string) => string)("@ana (X)", "@buddi on X"))];
+  if (typeof v === "function") return [String((v as (a: string) => string)("@ana"))];
   if (Array.isArray(v)) return v.flatMap(allText);
   if (v && typeof v === "object") return Object.values(v).flatMap(allText);
   return [];
@@ -41,9 +41,12 @@ describe("landing copy", () => {
   });
 });
 
-describe("DM targets", () => {
-  it("names where to send the DM in each language", () => {
-    expect(dmTargets("en")).toMatch(/^@\S+ on X/);
-    expect(dmTargets("es")).toMatch(/^@\S+ en X/);
+describe("DM step", () => {
+  it("links every listed profile over https, with an icon", () => {
+    expect(MEL_PROFILES.length).toBeGreaterThan(0);
+    for (const p of MEL_PROFILES) {
+      expect(p.url).toMatch(/^https:\/\//);
+      expect(SOCIAL_ICONS[p.network]).toContain("<svg");
+    }
   });
 });

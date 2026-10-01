@@ -41,12 +41,10 @@ export type AdminCreateCodesRequest = {
 };
 export type AdminCreateCodesResponse = { codes: string[] };
 
-// Landing page "Request a code" form: the handle the requester will DM Mel from, and
-// optionally the job they are preparing for. `website` is a honeypot: people leave it empty.
+// Landing page "Request a code" form: the social handle the requester will DM Mel from, and
+// optionally the job they are preparing for (a link or a title). `website` is a honeypot.
 export type Lang = "en" | "es";
-export type SocialPlatform = "instagram" | "x" | "tiktok";
-export const SOCIAL_PLATFORMS: readonly SocialPlatform[] = ["instagram", "x", "tiktok"];
-export type CodeRequestBody = { platform: SocialPlatform; handle: string; job_url?: string; lang?: Lang; website?: string };
+export type CodeRequestBody = { handle: string; job?: string; lang?: Lang; website?: string };
 export type CodeRequestResponse = { ok: true };
 
 export const STORY_BANK_KEY = "buddi-sage:story-bank";

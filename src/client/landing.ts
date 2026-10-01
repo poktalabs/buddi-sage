@@ -6,24 +6,25 @@
 //   the browser's language.
 // - Copy uses the glossary words (Round, Question, Answer, Voice clone, Best-self answer, Replay)
 //   and makes no claim the product does not back: the rewrite keeps the Guest's facts (guards.ts).
-import type { Lang, SocialPlatform } from "../shared/api";
+import type { Lang } from "../shared/api";
 import { failureMessage } from "./copy";
 
 export const LANG_KEY = "buddi-sage:lang";
 
-export const PLATFORM_NAMES: Record<SocialPlatform, string> = { instagram: "Instagram", x: "X", tiktok: "TikTok" };
+export type Social = "instagram" | "x" | "tiktok";
 
 /**
- * Where requesters send their DM. Only accounts Mel has confirmed are listed; a platform with
- * no entry here is still accepted on the form, the copy just names fewer places to write.
+ * Mel's profiles, where requesters send their DM after the form. Only confirmed profiles are
+ * listed; the "DM me" screen shows one icon per entry.
  */
-export const DM_ACCOUNTS: Partial<Record<SocialPlatform, string>> = { x: "thetokendad_" };
+export const MEL_PROFILES: { network: Social; name: string; url: string }[] = [{ network: "x", name: "X", url: "https://x.com/thetokendad_" }];
 
-/** "@thetokendad_ on X" or "@a on X or @b on Instagram". */
-export function dmTargets(lang: Lang): string {
-  const parts = Object.entries(DM_ACCOUNTS).map(([p, h]) => (lang === "es" ? `@${h} en ${PLATFORM_NAMES[p as SocialPlatform]}` : `@${h} on ${PLATFORM_NAMES[p as SocialPlatform]}`));
-  return parts.join(lang === "es" ? " o " : " or ");
-}
+// Simple line glyphs in the port-kit style (ink strokes), not the official logos.
+export const SOCIAL_ICONS: Record<Social, string> = {
+  instagram: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.6" fill="currentColor"/></svg>',
+  x: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-linecap="round" aria-hidden="true"><path d="M4 4 L20 20" stroke-width="3.2"/><path d="M20 4 L4 20" stroke-width="2"/></svg>',
+  tiktok: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 3v12.5a3.5 3.5 0 1 1-3.5-3.5"/><path d="M13 3c.6 2.6 2.6 4.4 5.5 4.6"/></svg>',
+};
 
 export type LandingCopy = {
   toggle: string; // label of the button that switches to the other language
@@ -34,13 +35,16 @@ export type LandingCopy = {
   haveCode: { title: string; code: string; contact: string; contactHint: string; submit: string };
   request: {
     title: string;
-    blurb: (targets: string) => string;
-    platform: string;
+    blurb: string;
     handle: string;
-    jobUrl: string;
+    job: string;
+    jobPlaceholder: string;
     submit: string;
     sending: string;
-    done: (who: string, targets: string) => string;
+    dmTitle: string;
+    dmBody: (handle: string) => string;
+    dmNote: string;
+    dmLabel: (network: string) => string;
   };
   howTitle: string;
   steps: { title: string; body: string }[];
@@ -65,13 +69,16 @@ export const LANDING: Record<Lang, LandingCopy> = {
     },
     request: {
       title: "Request a code",
-      blurb: (to) => `Codes are free while Sage Mode is invite-only. Tell us which account you will DM us from, then send a DM to ${to} and we will reply with your code.`,
-      platform: "Platform",
-      handle: "Your handle",
-      jobUrl: "Link to the job you are preparing for (optional)",
+      blurb: "Codes are free while Sage Mode is invite-only. Leave your handle, then DM me to get yours.",
+      handle: "Your Instagram, X or TikTok handle",
+      job: "The job you are preparing for (optional)",
+      jobPlaceholder: "A link or a job title",
       submit: "Request a code",
       sending: "Sending...",
-      done: (who, to) => `Got it. Now send a DM from ${who} to ${to} and we will reply with your code.`,
+      dmTitle: "One more step: DM me",
+      dmBody: (h) => `Send me a DM from ${h} to get your code. Tap where you want to write:`,
+      dmNote: "I reply with your code as soon as I see it.",
+      dmLabel: (n) => `DM me on ${n}`,
     },
     howTitle: "How it works",
     steps: [
@@ -102,13 +109,16 @@ export const LANDING: Record<Lang, LandingCopy> = {
     },
     request: {
       title: "Pide un código",
-      blurb: (to) => `Los códigos son gratis mientras Sage Mode es por invitación. Dinos desde qué cuenta nos vas a escribir, envía un DM a ${to} y te respondemos con tu código.`,
-      platform: "Plataforma",
-      handle: "Tu usuario",
-      jobUrl: "Enlace a la vacante para la que te preparas (opcional)",
+      blurb: "Los códigos son gratis mientras Sage Mode es por invitación. Deja tu usuario y escríbeme por DM para recibir el tuyo.",
+      handle: "Tu usuario de Instagram, X o TikTok",
+      job: "La vacante para la que te preparas (opcional)",
+      jobPlaceholder: "Un enlace o el nombre del puesto",
       submit: "Pedir un código",
       sending: "Enviando...",
-      done: (who, to) => `Listo. Ahora envía un DM desde ${who} a ${to} y te respondemos con tu código.`,
+      dmTitle: "Un paso más: escríbeme por DM",
+      dmBody: (h) => `Envíame un DM desde ${h} para recibir tu código. Toca dónde quieres escribirme:`,
+      dmNote: "Te respondo con tu código en cuanto lo vea.",
+      dmLabel: (n) => `Escríbeme por ${n}`,
     },
     howTitle: "Cómo funciona",
     steps: [
@@ -130,7 +140,7 @@ export const LANDING: Record<Lang, LandingCopy> = {
 const FAILURE_ES: Record<string, string> = {
   invalid_code: "Ese código no funciona. Revísalo e intenta de nuevo.",
   contact_required: "Agrega un email o usuario de X la primera vez que uses este código.",
-  bad_request: "Revisa los datos: el usuario debe existir en esa plataforma y el enlace debe ser una URL.",
+  bad_request: "Revisa tu usuario: solo letras, números, puntos y guiones bajos.",
   rate_limited: "Demasiadas solicitudes desde aquí. Intenta de nuevo en una hora.",
   unauthorized: "Tu sesión terminó. Escribe tu código otra vez para continuar.",
   upstream_error: "Un servicio del que dependemos no respondió. Intenta de nuevo en un momento.",
