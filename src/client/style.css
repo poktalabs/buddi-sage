@@ -204,25 +204,29 @@ audio { width: 100%; margin: 0 0 12px; }
 .said summary { font-weight: 800; }
 .said p { margin: 8px 0 0; }
 
-/* Landing: hero, the two calls to action side by side, how it works, notes. */
-.landing { padding: 8px 0 0; }
-/* Hero: headline, lede and one call-to-action card on the left, Sage large on the right. On a
-   phone Sage shrinks beside the headline so the card stays near the top. */
-.hero { display: grid; grid-template-columns: 1fr; gap: 24px; align-items: center; margin: 8px 0 8px; }
-.hero-head { display: grid; grid-template-columns: 1fr 104px; gap: 12px; align-items: center; }
-.hero h1 { font-size: 2rem; line-height: 1.05; margin: 0.25rem 0 0.75rem; }
-.lede { max-width: 36rem; margin-bottom: 20px; }
-.hero-art { width: 100%; height: auto; }
-.hero-art-lg { display: none; }
-@media (min-width: 720px) {
-  .hero { grid-template-columns: 1fr 300px; gap: 32px; margin-top: 24px; }
-  .hero-head { grid-template-columns: 1fr; }
-  .hero-art-sm { display: none; }
-  .hero-art-lg { display: block; align-self: center; }
-  .hero h1 { font-size: 2.5rem; }
+/* Landing: a full-bleed hero band, then how it works and notes. */
+.is-landing .column { max-width: 68rem; }
+html:has(.is-landing) { overflow-x: clip; } /* the band is 100vw wide; never let a scrollbar make it scroll */
+.landing { padding: 0; }
+/* Hero: "Enter Sage Mode." with Sage meditating beside it. The band breaks out of the column and
+   inverts the page texture (light dots on the darker paper). On a phone Sage sits on top, kept
+   short so the call-to-action card still starts in the first screen. */
+.hero { margin: -24px calc(50% - 50vw) 0; padding: 24px 0 40px; border-bottom: 3px solid var(--color-ink);
+  background-color: var(--color-paper-dark); background-image: radial-gradient(var(--color-paper) 2px, transparent 2px); background-size: 22px 22px; }
+.hero-inner { max-width: 68rem; margin: 0 auto; padding: 0 16px; box-sizing: border-box; display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; }
+.hero-art { order: -1; width: 100%; max-width: 230px; height: auto; justify-self: center; }
+.hero h1 { font-size: clamp(2.75rem, 11vw, 4.75rem); font-weight: 800; line-height: 1.02; letter-spacing: -0.03em; margin: 0 0 24px; }
+.hero h1:focus { outline: none; }
+.hero-mark { display: inline-block; background: var(--color-gold); border: 3px solid var(--color-ink); box-shadow: 5px 5px 0 0 var(--color-ink);
+  border-radius: 8px; padding: 0 0.18em 0.04em; transform: rotate(-1.5deg); white-space: nowrap; }
+.lede { font-size: 1.125rem; line-height: 1.5; max-width: 30rem; margin: 0 0 24px; }
+@media (min-width: 880px) {
+  .hero { padding: 48px 0 64px; }
+  .hero-inner { grid-template-columns: minmax(0, 31rem) minmax(0, 1fr); column-gap: 48px; align-items: center; }
+  .hero-art { order: 0; max-width: 540px; justify-self: end; }
 }
 /* The call-to-action card: a segmented toggle, then the active form. */
-.cta { margin: 0; max-width: 30rem; }
+.cta { margin: 0; max-width: 31rem; }
 .segmented { display: grid; grid-template-columns: 1fr 1fr; border-radius: 6px; overflow: hidden; margin: 0 0 20px; background: var(--color-panel); }
 .seg { border: 0; background: transparent; color: var(--color-ink); font: inherit; font-weight: 800; padding: 10px 12px; cursor: pointer; }
 .seg + .seg { border-left: 2px solid var(--color-ink); }
@@ -237,7 +241,7 @@ audio { width: 100%; margin: 0 0 12px; }
 .social-icon { display: grid; place-items: center; }
 .dm-title[tabindex="-1"]:focus { outline: none; }
 .hp { position: absolute; left: -10000px; width: 1px; height: 1px; opacity: 0; }
-.how { margin: 32px 0 0; }
+.how { margin: 40px 0 0; }
 .steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr; gap: 16px; }
 @media (min-width: 720px) { .steps { grid-template-columns: repeat(3, 1fr); } }
 .step { margin: 0; }

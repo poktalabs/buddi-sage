@@ -78,6 +78,8 @@ const main = document.getElementById("main")!;
 function mount(...nodes: Node[]) {
   for (const fn of teardown.splice(0)) fn();
   main.replaceChildren(...nodes);
+  // The landing page runs wider than the app screens, header included, so the logo lines up with the hero.
+  document.body.classList.toggle("is-landing", main.querySelector(".landing") !== null);
   renderHeader();
   main.querySelector<HTMLElement>("h1, h2")?.focus({ preventScroll: true });
   window.scrollTo(0, 0);
@@ -292,12 +294,16 @@ function showLanding(message?: string) {
         { class: "hero" },
         h(
           "div",
-          { class: "hero-main" },
-          h("div", { class: "hero-head" }, h("div", {}, h("p", { class: "kicker" }, t.kicker), h("h1", { tabIndex: -1 }, t.headline)), h("img", { class: "hero-art hero-art-sm", src: "/sage-hero.svg", alt: "", width: 360, height: 300 })),
-          h("p", { class: "reading lede" }, t.lede),
-          h("div", { class: "ds-card cta" }, h("div", { class: "segmented nb-sm", role: "tablist", "aria-label": t.ctaLabel }, ...tabs), panelBox),
+          { class: "hero-inner" },
+          h(
+            "div",
+            { class: "hero-main" },
+            h("h1", { tabIndex: -1 }, `${t.headline[0]} `, h("span", { class: "hero-mark" }, t.headline[1])),
+            h("p", { class: "lede" }, t.lede),
+            h("div", { class: "ds-card cta" }, h("div", { class: "segmented nb-sm", role: "tablist", "aria-label": t.ctaLabel }, ...tabs), panelBox),
+          ),
+          h("img", { class: "hero-art", src: "/sage-hero.svg", alt: "", width: 520, height: 460 }),
         ),
-        h("img", { class: "hero-art hero-art-lg", src: "/sage-hero.svg", alt: "", width: 360, height: 300 }),
       ),
       h(
         "section",

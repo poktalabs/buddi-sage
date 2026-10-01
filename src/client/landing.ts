@@ -33,8 +33,7 @@ export const SOCIAL_ICONS: Record<Social, string> = {
 export type LandingCopy = {
   toggle: string; // label of the button that switches to the other language
   toggleLabel: string; // accessible name for that button
-  kicker: string;
-  headline: string;
+  headline: [lead: string, mark: string]; // "Enter" + the highlighted "Sage Mode."
   toggleRequest: string;
   toggleHave: string;
   ctaLabel: string;
@@ -64,12 +63,11 @@ export const LANDING: Record<Lang, LandingCopy> = {
   en: {
     toggle: "ES",
     toggleLabel: "Ver en español",
-    kicker: "Interview practice, out loud",
     toggleRequest: "Get a code",
     toggleHave: "I have a code",
     ctaLabel: "Get started",
-    headline: "Hear your best interview answer, in your own voice",
-    lede: "Sage asks you a hard interview Question out loud and pushes back once. Then you hear your own Answer, tightened into your Best-self answer and spoken in your Voice clone.",
+    headline: ["Enter", "Sage Mode."],
+    lede: "Sage asks you one hard interview Question and pushes back once. Then you hear your best answer, in your own voice.",
     haveCode: {
       title: "Have a code?",
       code: "Your code",
@@ -107,12 +105,11 @@ export const LANDING: Record<Lang, LandingCopy> = {
   es: {
     toggle: "EN",
     toggleLabel: "View in English",
-    kicker: "Práctica de entrevista, en voz alta",
     toggleRequest: "Quiero un código",
     toggleHave: "Tengo un código",
     ctaLabel: "Empieza",
-    headline: "Escucha tu mejor respuesta de entrevista, con tu propia voz",
-    lede: "Sage te hace en voz alta una pregunta difícil de entrevista y te contradice una vez. Después escuchas tu propia respuesta, pulida como tu mejor versión y dicha con tu clon de voz.",
+    headline: ["Entra en", "Sage Mode."],
+    lede: "Sage te hace una pregunta difícil de entrevista y te contradice una vez. Después escuchas tu mejor respuesta, con tu propia voz.",
     haveCode: {
       title: "¿Tienes un código?",
       code: "Tu código",
