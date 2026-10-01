@@ -1,0 +1,39 @@
+<!doctype html>
+<!-- The share card (public/og.png), 1200x630. Source of truth for the image: edit here, then
+     re-render with a browser at 1200x630 (see og/README.md). Colors and type follow the landing hero. -->
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<style>
+  :root { --ink: #0a0a0a; --paper: #fff9f5; --paper-dark: #fff0e8; --gold: #ffb800; --magenta: #c4177a; --violet: #7c3aed; }
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+  body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--ink);
+    background-color: var(--paper-dark); background-image: radial-gradient(var(--paper) 2.5px, transparent 2.5px); background-size: 26px 26px; }
+  .card { box-sizing: border-box; width: 1200px; height: 630px; border: 10px solid var(--ink); display: grid; grid-template-columns: minmax(0, 1fr) 420px; column-gap: 20px; align-items: center; padding: 0 44px 0 60px; }
+  .brand { display: flex; align-items: center; gap: 12px; font-size: 30px; font-weight: 800; margin-bottom: 26px; }
+  .logo { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 9px; background: var(--magenta); color: #fff;
+    border: 3px solid var(--ink); box-shadow: 4px 4px 0 0 var(--ink); font-size: 26px; }
+  h1 { margin: 0 0 30px; font-size: 92px; font-weight: 800; line-height: 1.12; letter-spacing: -0.03em; }
+  .mark { display: inline-block; background: var(--gold); border: 5px solid var(--ink); box-shadow: 8px 8px 0 0 var(--ink); border-radius: 12px;
+    padding: 0.04em 0.2em 0.14em; transform: rotate(-1.5deg); white-space: nowrap; }
+  .tagline { display: flex; align-items: center; gap: 10px; margin: 0 0 40px; font-size: 22px; font-weight: 700; white-space: nowrap; }
+  .dot { color: var(--magenta); font-size: 1.4em; line-height: 1; }
+  .cta { display: flex; align-items: center; gap: 18px; }
+  .try { font-size: 28px; font-weight: 800; }
+  .url { background: var(--violet); color: #fff; border: 4px solid var(--ink); box-shadow: 6px 6px 0 0 var(--ink); border-radius: 10px;
+    padding: 12px 24px; font-size: 30px; font-weight: 800; letter-spacing: 0.01em; }
+  .art { width: 420px; height: auto; display: block; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div>
+      <div class="brand"><span class="logo">B</span>BUDDi</div>
+      <h1>Enter<br /><span class="mark">Sage Mode</span></h1>
+      <p class="tagline"><span>Paste your job</span><span class="dot">&bull;</span><span>Train its Questions</span><span class="dot">&bull;</span><span>Boost your confidence</span></p>
+      <div class="cta"><span class="try">Try now at:</span><span class="url">sage.agentcamp.xyz</span></div>
+    </div>
+    <img class="art" src="/sage-hero.svg" alt="" />
+  </div>
+</body>
+</html>
