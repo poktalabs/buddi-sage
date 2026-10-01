@@ -16,7 +16,7 @@
     "COACH_MODEL": "deepseek-ai/DeepSeek-V4-Pro-0813",
     "REWRITE_MODEL": "MiniMaxAI/MiniMax-M3",
     "TTS_MODEL": "eleven_v4",
-    "AGENT_ID": ""
+    "AGENT_ID": "<agent-id>"
   }
   // Secrets (wrangler secret put / .dev.vars): ELEVENLABS_API_KEY, NEBIUS_API_KEY, LLM_PROXY_SECRET, SESSION_SECRET, ADMIN_SECRET
 }
