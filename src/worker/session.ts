@@ -74,3 +74,10 @@ export function requireBearer(req: Request, secret: string): boolean {
   if (!match) return false;
   return timingSafeEqual(match[1]!, secret);
 }
+
+/** True when the request's `name` header equals the secret (constant-time); false on an empty secret. */
+export function requireHeader(req: Request, name: string, secret: string): boolean {
+  const given = req.headers.get(name);
+  if (!secret || given === null) return false;
+  return timingSafeEqual(given, secret);
+}

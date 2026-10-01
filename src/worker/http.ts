@@ -18,7 +18,8 @@ export type ErrorCode =
   | "conversation_timeout"
   | "no_save_answer"
   | "empty_answer"
-  | "upstream_error";
+  | "upstream_error"
+  | "rate_limited";
 
 export function json(body: unknown, status = 200, headers: HeadersInit = {}): Response {
   const h = new Headers(headers);

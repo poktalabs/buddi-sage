@@ -29,6 +29,9 @@
   --color-info: #2563eb;       /* blue: neutral information / tips */
   --color-danger: #dc2626;     /* red: errors only, never the CTA */
   --color-disabled: #d6d2cc;   /* neutral gray for disabled controls, never a washed accent */
+  /* Sage Mode additions (not in the port kit): inputs sit on white cards, so they need their own fill. */
+  --color-field: #faf7f4;      /* input fill: warm off-white, distinct from the white card */
+  --color-placeholder: #8c857e; /* placeholder text: warm gray, clearly lighter than ink */
 }
 
 /* ===== Base styles (port kit, verbatim) ===== */
@@ -97,10 +100,10 @@ button:disabled { cursor: not-allowed; }
 .ds-card-gold    { background:var(--color-gold);    color:var(--color-ink); }
 
 /* Input: 2px ink border that shifts to accent on focus */
-.ds-input { width:100%; box-sizing:border-box; background:var(--color-panel); color:var(--color-ink);
+.ds-input { width:100%; box-sizing:border-box; background:var(--color-field); color:var(--color-ink);
   border:2px solid var(--color-ink); border-radius:6px; padding:8px 12px; font-size:0.875rem; outline:none; }
-.ds-input::placeholder { color:var(--color-charcoal); }
-.ds-input:focus { border-color:var(--color-magenta); }
+.ds-input::placeholder { color:var(--color-placeholder); opacity:1; }
+.ds-input:focus { border-color:var(--color-magenta); background:var(--color-panel); }
 .ds-input:focus-visible { outline:3px solid var(--color-ink); outline-offset:2px; }
 
 /* Status notes: one hue each, none borrows the accent */
@@ -200,3 +203,51 @@ audio { width: 100%; margin: 0 0 12px; }
 .best-self { margin: 0 0 16px; font-size: 1rem; line-height: 1.5; }
 .said summary { font-weight: 800; }
 .said p { margin: 8px 0 0; }
+
+/* Landing: a full-bleed hero band, then how it works and notes. */
+.is-landing .column { max-width: 68rem; }
+html:has(.is-landing) { overflow-x: clip; } /* the band is 100vw wide; never let a scrollbar make it scroll */
+.landing { padding: 0; }
+/* Hero: "Enter Sage Mode." with Sage meditating beside it. The band breaks out of the column and
+   inverts the page texture (light dots on the darker paper). On a phone Sage sits on top, kept
+   short so the call-to-action card still starts in the first screen. */
+.hero { margin: -24px calc(50% - 50vw) 0; padding: 24px 0 40px; border-bottom: 3px solid var(--color-ink);
+  background-color: var(--color-paper-dark); background-image: radial-gradient(var(--color-paper) 2px, transparent 2px); background-size: 22px 22px; }
+.hero-inner { max-width: 68rem; margin: 0 auto; padding: 0 16px; box-sizing: border-box; display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; }
+.hero-art { order: -1; width: 100%; max-width: 230px; height: auto; justify-self: center; }
+.hero h1 { font-size: clamp(2.75rem, 11vw, 4.75rem); font-weight: 800; line-height: 1.02; letter-spacing: -0.03em; margin: 0 0 24px; }
+.hero h1:focus { outline: none; }
+.hero-mark { display: inline-block; background: var(--color-gold); border: 3px solid var(--color-ink); box-shadow: 5px 5px 0 0 var(--color-ink);
+  border-radius: 8px; padding: 0 0.18em 0.04em; transform: rotate(-1.5deg); white-space: nowrap; }
+.lede { font-size: 1.125rem; line-height: 1.5; max-width: 30rem; margin: 0 0 24px; }
+@media (min-width: 880px) {
+  .hero { padding: 48px 0 64px; }
+  .hero-inner { grid-template-columns: minmax(0, 31rem) minmax(0, 1fr); column-gap: 48px; align-items: center; }
+  .hero-art { order: 0; max-width: 540px; justify-self: end; }
+}
+/* The call-to-action card: a segmented toggle, then the active form. */
+.cta { margin: 0; max-width: 31rem; }
+.segmented { display: grid; grid-template-columns: 1fr 1fr; border-radius: 6px; overflow: hidden; margin: 0 0 20px; background: var(--color-panel); }
+.seg { border: 0; background: transparent; color: var(--color-ink); font: inherit; font-weight: 800; padding: 10px 12px; cursor: pointer; }
+.seg + .seg { border-left: 2px solid var(--color-ink); }
+.seg[aria-selected="true"] { background: var(--color-ink); color: #fff; }
+.seg:focus-visible { outline: 3px solid var(--color-magenta); outline-offset: -3px; }
+.dm-title { margin-top: 0; }
+.how h2, .notes h2 { margin-top: 0; }
+.hint { font-weight: 500; }
+.social-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 0 16px; }
+.social-link { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 84px; padding: 12px 14px;
+  background: var(--color-panel); color: var(--color-ink); border-radius: 6px; font-weight: 800; text-decoration: none; }
+.social-icon { display: grid; place-items: center; }
+.dm-title[tabindex="-1"]:focus { outline: none; }
+.hp { position: absolute; left: -10000px; width: 1px; height: 1px; opacity: 0; }
+.how { margin: 40px 0 0; }
+.steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr; gap: 16px; }
+@media (min-width: 720px) { .steps { grid-template-columns: repeat(3, 1fr); } }
+.step { margin: 0; }
+.step h3 { margin: 10px 0 6px; }
+.step p { margin: 0; }
+.notes { margin: 24px 0 0; }
+.notes ul { margin: 0; padding-left: 1.2rem; }
+.notes li + li { margin-top: 6px; }
+.lang-toggle { padding: 4px 10px; }

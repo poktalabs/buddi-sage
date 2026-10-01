@@ -4,7 +4,7 @@
 // Voice clone is only cleaned up an hour after the last Round started, so the hourly cron
 // cannot delete it between that Round's start and its Replay. Owner codes are never cleaned.
 // Timestamps written here are ISO 8601 UTC strings, which compare correctly as text.
-import type { CodeKind } from "../shared/api";
+import type { CodeKind, Lang } from "../shared/api";
 import type { GuardFailure } from "./guards";
 
 export type CodeRow = {
@@ -169,4 +169,83 @@ export async function finishRound(
 export async function failRound(db: D1Database, id: string): Promise<boolean> {
   const res = await db.prepare("UPDATE rounds SET status = 'failed' WHERE id = ? AND status = 'started'").bind(id).run();
   return res.meta.changes === 1;
+}
+
+// Code requests (landing page form, approved from the Telegram admin bot)
+
+export type RequestStatus = "pending" | "approved" | "dismissed";
+
+export type CodeRequestRow = {
+  id: number;
+  handle: string;
+  job: string | null;
+  lang: Lang;
+  status: RequestStatus;
+  code: string | null;
+  ip_hash: string | null;
+  created_at: string;
+};
+
+export async function insertCodeRequest(
+  db: D1Database,
+  args: { handle: string; job: string | null; lang: Lang; ip_hash: string | null; now: Date },
+): Promise<number> {
+  const row = await db
+    .prepare("INSERT INTO code_requests (handle, job, lang, ip_hash, created_at) VALUES (?, ?, ?, ?, ?) RETURNING id")
+    .bind(args.handle, args.job, args.lang, args.ip_hash, args.now.toISOString())
+    .first<{ id: number }>();
+  return row!.id;
+}
+
+/** How many requests this IP hash made since `since`, for the form's rate limit. */
+export async function countRequestsSince(db: D1Database, ipHash: string, since: Date): Promise<number> {
+  const row = await db
+    .prepare("SELECT COUNT(*) AS n FROM code_requests WHERE ip_hash = ? AND created_at >= ?")
+    .bind(ipHash, since.toISOString())
+    .first<{ n: number }>();
+  return row?.n ?? 0;
+}
+
+/** A pending request for this handle, so a double submit does not ping Mel twice. */
+export async function findPendingRequest(db: D1Database, handle: string): Promise<CodeRequestRow | null> {
+  return db
+    .prepare("SELECT * FROM code_requests WHERE status = 'pending' AND lower(handle) = lower(?) LIMIT 1")
+    .bind(handle)
+    .first<CodeRequestRow>();
+}
+
+export async function getCodeRequest(db: D1Database, id: number): Promise<CodeRequestRow | null> {
+  return db.prepare("SELECT * FROM code_requests WHERE id = ?").bind(id).first<CodeRequestRow>();
+}
+
+export async function listPendingRequests(db: D1Database, limit: number): Promise<CodeRequestRow[]> {
+  const res = await db
+    .prepare("SELECT * FROM code_requests WHERE status = 'pending' ORDER BY id LIMIT ?")
+    .bind(limit)
+    .all<CodeRequestRow>();
+  return res.results;
+}
+
+/** Closes a pending request; false if it was already approved or dismissed. */
+export async function closeRequest(db: D1Database, id: number, status: "approved" | "dismissed", code: string | null): Promise<boolean> {
+  const res = await db
+    .prepare("UPDATE code_requests SET status = ?, code = ? WHERE id = ? AND status = 'pending'")
+    .bind(status, code, id)
+    .run();
+  return res.meta.changes === 1;
+}
+
+export type Stats = {
+  codes: { kind: string; n: number; used: number; allowance: number }[];
+  rounds: { status: string; n: number }[];
+  pendingRequests: number;
+};
+
+export async function readStats(db: D1Database): Promise<Stats> {
+  const [codes, rounds, pending] = await Promise.all([
+    db.prepare("SELECT kind, COUNT(*) AS n, SUM(used) AS used, SUM(allowance) AS allowance FROM codes GROUP BY kind ORDER BY kind").all<Stats["codes"][number]>(),
+    db.prepare("SELECT status, COUNT(*) AS n FROM rounds GROUP BY status ORDER BY status").all<Stats["rounds"][number]>(),
+    db.prepare("SELECT COUNT(*) AS n FROM code_requests WHERE status = 'pending'").first<{ n: number }>(),
+  ]);
+  return { codes: codes.results, rounds: rounds.results, pendingRequests: pending?.n ?? 0 };
 }

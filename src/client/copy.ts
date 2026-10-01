@@ -20,6 +20,7 @@ export const FAILURE_COPY: Record<string, string> = {
   no_save_answer: "Sage did not save an Answer in that Round, so there is no Replay this time.",
   empty_answer: "We did not hear an Answer to save in that Round, so there is no Replay this time.",
   upstream_error: "A service we depend on did not answer. Please try again in a moment.",
+  rate_limited: "Too many requests from here. Please try again in an hour.",
   network: "You look offline. Check your connection and try again.",
   bad_response: "Something went wrong on our side. Please try again.",
   // Page-side Round failures (round.ts).

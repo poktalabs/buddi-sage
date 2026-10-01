@@ -5,6 +5,8 @@
 // codes, never on status numbers or message text.
 import type {
   ApiError,
+  CodeRequestBody,
+  CodeRequestResponse,
   Me,
   RedeemRequest,
   ReplayRequest,
@@ -36,6 +38,8 @@ export interface ClientApi {
   replay(roundId: string, req: ReplayRequest): Promise<ReplayResponse>;
   /** Fetches Replay audio once. Each fetch is a paid text to speech call. */
   fetchAudio(url: string): Promise<Blob>;
+  /** Landing page: asks Mel for a code. */
+  requestCode(req: CodeRequestBody): Promise<CodeRequestResponse>;
 }
 
 type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
@@ -90,5 +94,6 @@ export function httpApi(fetchImpl: FetchLike = (i, init) => fetch(i, init)): Cli
     startRound: (req) => json<StartRoundResponse>("/api/rounds", post(req)),
     replay: (roundId, req) => json<ReplayResponse>(`/api/rounds/${encodeURIComponent(roundId)}/replay`, post(req)),
     fetchAudio: async (url) => (await send(url)).blob(),
+    requestCode: (req) => json<CodeRequestResponse>("/api/requests", post(req)),
   };
 }

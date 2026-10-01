@@ -1,5 +1,5 @@
 // The Worker entry: a small hand-written router (no router dependency for ten routes) and the
-// hourly cron. Only /api/*, /llm/* and /admin/* reach it (wrangler.jsonc run_worker_first);
+// hourly cron. Only /api/*, /llm/*, /admin/* and /telegram/* reach it (wrangler.jsonc run_worker_first);
 // the static assets serve every other path. Every route is wired here in Wave 1 so Wave 2
 // agents fill handler bodies without touching this file. Auth is decided here, not in the
 // handlers: session routes get a verified Session or a 401, /llm and /admin check their own
@@ -13,6 +13,8 @@ import { addVoice, deleteVoice } from "./routes/voice";
 import { startRound } from "./routes/rounds";
 import { chatCompletions } from "./routes/llm";
 import { audio, replay } from "./routes/replay";
+import { createCodeRequest } from "./routes/requests";
+import { telegramWebhook } from "./routes/telegram";
 import { cleanupVoices } from "./cleanup";
 
 type Params = { id: string };
@@ -29,6 +31,8 @@ const ROUTES: Route[] = [
   { method: "POST", pattern: /^\/api\/redeem$/, auth: "none", handler: redeem },
   { method: "GET", pattern: /^\/api\/me$/, auth: "session", handler: me },
   { method: "POST", pattern: /^\/admin\/codes$/, auth: "none", handler: createCodes },
+  { method: "POST", pattern: /^\/api\/requests$/, auth: "none", handler: (r, e) => createCodeRequest(r, e) },
+  { method: "POST", pattern: /^\/telegram\/webhook$/, auth: "none", handler: telegramWebhook },
   { method: "POST", pattern: /^\/api\/voice$/, auth: "session", handler: addVoice },
   { method: "DELETE", pattern: /^\/api\/voice$/, auth: "session", handler: deleteVoice },
   { method: "POST", pattern: /^\/api\/rounds$/, auth: "session", handler: startRound },

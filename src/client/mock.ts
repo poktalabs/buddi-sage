@@ -60,6 +60,11 @@ export function mockApi(delayMs = 350): ClientApi {
       hasVoice = true;
       return { hasVoice };
     },
+    async requestCode(req) {
+      await sleep(delayMs);
+      if (!/^@?[A-Za-z0-9._]{1,30}$/.test(req.handle.trim())) throw new ApiFailure(400, "bad_request");
+      return { ok: true };
+    },
     async deleteVoice() {
       await sleep(delayMs);
       requireSession();
