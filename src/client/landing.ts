@@ -1,7 +1,8 @@
 // Landing page words, in English and Spanish. Decisions encoded here:
 // - Only the landing page is translated. Sage, the Question set and every later screen are in
 //   English, so the Spanish copy says plainly that practice is in English.
-// - Both calls to action (Have a code, Request a code) sit in the hero, above the fold.
+// - Both calls to action (Get a code, I have a code) sit in the hero, above the fold, and open
+//   the same two-tab form in a dialog.
 // - The language is the visitor's choice, remembered on this device; the first visit follows
 //   the browser's language.
 // - Copy uses the glossary words (Round, Question, Answer, Voice clone, Best-self answer, Replay)
@@ -33,11 +34,13 @@ export const SOCIAL_ICONS: Record<Social, string> = {
 export type LandingCopy = {
   toggle: string; // label of the button that switches to the other language
   toggleLabel: string; // accessible name for that button
-  headline: [lead: string, mark: string]; // "Enter" + the highlighted "Sage Mode."
+  headline: [lead: string, mark: string]; // "Enter" + the highlighted "Sage Mode"
+  tagline: string[]; // the three actions under the headline, shown with dot separators
+  ctaNote: string; // reassurance line under the hero buttons
+  close: string; // accessible name of the dialog's close button
   toggleRequest: string;
   toggleHave: string;
   ctaLabel: string;
-  lede: string;
   haveCode: { title: string; code: string; contact: string; contactHint: string; submit: string };
   request: {
     title: string;
@@ -66,8 +69,10 @@ export const LANDING: Record<Lang, LandingCopy> = {
     toggleRequest: "Get a code",
     toggleHave: "I have a code",
     ctaLabel: "Get started",
-    headline: ["Enter", "Sage Mode."],
-    lede: "Paste the job you want. Sage asks you a hard interview Question for it and pushes back once. Then you hear your best answer, in your own voice.",
+    headline: ["Enter", "Sage Mode"],
+    tagline: ["Paste your job", "Train its Questions", "Boost your confidence"],
+    ctaNote: "Free while Sage Mode is invite-only. About 5 minutes, in English.",
+    close: "Close",
     haveCode: {
       title: "Have a code?",
       code: "Your code",
@@ -109,8 +114,10 @@ export const LANDING: Record<Lang, LandingCopy> = {
     toggleRequest: "Quiero un código",
     toggleHave: "Tengo un código",
     ctaLabel: "Empieza",
-    headline: ["Entra en", "Sage Mode."],
-    lede: "Pega el trabajo que quieres. Sage te hace una pregunta difícil de entrevista para ese puesto y te contradice una vez. Después escuchas tu mejor respuesta, con tu propia voz.",
+    headline: ["Entra en", "Sage Mode"],
+    tagline: ["Pega tu trabajo", "Entrena sus preguntas", "Aumenta tu confianza"],
+    ctaNote: "Gratis mientras Sage Mode es por invitación. Unos 5 minutos, en inglés.",
+    close: "Cerrar",
     haveCode: {
       title: "¿Tienes un código?",
       code: "Tu código",

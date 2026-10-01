@@ -126,7 +126,7 @@ function renderHeader() {
           "a",
           { class: "brand group", href: "/", onClick: goHome },
           h("span", { class: "logo nb-sm nb-press-child" }, "B"),
-          h("span", {}, "BUDDi Sage Mode"),
+          h("span", {}, "BUDDi"),
         ),
         h("div", { class: "bar-right" }, ...right),
       ),
@@ -247,7 +247,8 @@ function route() {
   else showPicker();
 }
 
-// The landing page doubles as the code screen: both calls to action sit in the hero.
+// The landing page doubles as the code screen: both hero buttons open the same two-tab form in
+// a dialog, on the tab the visitor picked.
 function showLanding(message?: string) {
   const t = LANDING[lang];
 
@@ -317,13 +318,11 @@ function showLanding(message?: string) {
   );
   requestCard.replaceChildren(h("p", { class: "muted" }, t.request.blurb), requestForm);
 
-  // One card, two modes. A link with ?code= or an ended Session opens on "I have a code".
+  // One card, two modes. A link with ?code= or an ended Session opens the dialog on "I have a code".
   const fromLink = new URLSearchParams(location.search).get("code");
-  if (fromLink) {
-    code.value = fromLink.toUpperCase();
-    landingMode = "have";
-  }
-  if (message) landingMode = "have";
+  if (fromLink) code.value = fromLink.toUpperCase();
+  const openOnLoad = Boolean(fromLink || message);
+  if (openOnLoad) landingMode = "have";
   const haveCard = h("div", {}, codeForm);
   const panelBox = h("div", { class: "cta-panel", role: "tabpanel" });
   const tabs = (["request", "have"] as const).map((m) =>
@@ -337,6 +336,24 @@ function showLanding(message?: string) {
   };
   setMode(landingMode, false);
 
+  const closeBtn = h("button", { type: "button", class: "dialog-close ds-btn ds-btn-ghost", "aria-label": t.close, onClick: () => dialog.close() }, "\u00d7");
+  const dialog = h(
+    "dialog",
+    { class: "cta-dialog ds-card", "aria-label": t.ctaLabel },
+    closeBtn,
+    h("div", { class: "segmented nb-sm", role: "tablist", "aria-label": t.ctaLabel }, ...tabs),
+    panelBox,
+  ) as HTMLDialogElement;
+  // A click on the backdrop lands on the dialog element itself: close, like Escape does.
+  dialog.addEventListener("click", (ev) => {
+    if (ev.target === dialog) dialog.close();
+  });
+  const open = (m: "request" | "have") => {
+    setMode(m, false);
+    dialog.showModal();
+    (m === "request" ? handle : code).focus();
+  };
+
   mount(
     h(
       "div",
@@ -347,13 +364,15 @@ function showLanding(message?: string) {
         h(
           "div",
           { class: "hero-inner" },
+          h("h1", { tabIndex: -1 }, `${t.headline[0]} `, h("span", { class: "hero-mark" }, t.headline[1])),
+          h("p", { class: "tagline" }, ...t.tagline.flatMap((s, i) => (i === 0 ? [h("span", {}, s)] : [h("span", { class: "tagline-dot", "aria-hidden": "true" }, "\u2022"), h("span", {}, s)]))),
           h(
             "div",
-            { class: "hero-main" },
-            h("h1", { tabIndex: -1 }, `${t.headline[0]} `, h("span", { class: "hero-mark" }, t.headline[1])),
-            h("p", { class: "lede" }, t.lede),
-            h("div", { class: "ds-card cta" }, h("div", { class: "segmented nb-sm", role: "tablist", "aria-label": t.ctaLabel }, ...tabs), panelBox),
+            { class: "hero-ctas" },
+            h("button", { type: "button", class: "ds-btn ds-btn-ghost ds-btn-lg", "aria-haspopup": "dialog", onClick: () => open("request") }, t.toggleRequest),
+            h("button", { type: "button", class: "ds-btn ds-btn-primary ds-btn-lg", "aria-haspopup": "dialog", onClick: () => open("have") }, t.toggleHave),
           ),
+          h("p", { class: "cta-note" }, t.ctaNote),
           h("img", { class: "hero-art", src: "/sage-hero.svg", alt: "", width: 520, height: 460 }),
         ),
       ),
@@ -368,8 +387,10 @@ function showLanding(message?: string) {
         ),
       ),
       h("section", { class: "notes inset nb-sm" }, h("h2", {}, t.notesTitle), h("ul", {}, ...t.notes.map((n) => h("li", {}, n)))),
+      dialog,
     ),
   );
+  if (openOnLoad) open("have");
 }
 
 // After a request: where to DM Mel, one big icon per profile.
