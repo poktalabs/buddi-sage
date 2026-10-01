@@ -15,6 +15,7 @@ import { chatCompletions } from "./routes/llm";
 import { audio, replay } from "./routes/replay";
 import { createCodeRequest } from "./routes/requests";
 import { telegramWebhook } from "./routes/telegram";
+import { setJob } from "./routes/job";
 import { cleanupVoices } from "./cleanup";
 
 type Params = { id: string };
@@ -35,6 +36,7 @@ const ROUTES: Route[] = [
   { method: "POST", pattern: /^\/telegram\/webhook$/, auth: "none", handler: telegramWebhook },
   { method: "POST", pattern: /^\/api\/voice$/, auth: "session", handler: addVoice },
   { method: "DELETE", pattern: /^\/api\/voice$/, auth: "session", handler: deleteVoice },
+  { method: "POST", pattern: /^\/api\/job$/, auth: "session", handler: setJob },
   { method: "POST", pattern: /^\/api\/rounds$/, auth: "session", handler: startRound },
   { method: "POST", pattern: /^\/api\/rounds\/(?<id>[^/]+)\/replay$/, auth: "session", handler: replay },
   { method: "GET", pattern: /^\/api\/rounds\/(?<id>[^/]+)\/audio$/, auth: "session", handler: audio },

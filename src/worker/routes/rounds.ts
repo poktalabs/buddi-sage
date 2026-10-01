@@ -5,11 +5,12 @@
 // refunded and marked failed: the Guest never loses a Round of the Allowance to an upstream
 // error. Nothing here logs the Guest's code, Contact or any key.
 import type { StartRoundResponse } from "../../shared/api";
-import { findQuestion } from "../../shared/questions";
+import { resolveQuestion } from "../../shared/questions";
 import { failRound, getCode, insertRound, refundRound, spendRound } from "../db";
 import { type FetchImpl, UpstreamError, getConversationToken } from "../eleven";
 import type { Env, Session } from "../env";
 import { error, json, readJsonObject } from "../http";
+import { jobVariables, readBrief } from "../job";
 
 /**
  * POST /api/rounds. `fetchImpl` is only for tests (the router passes four arguments, so the
@@ -25,11 +26,13 @@ export async function startRound(
   const body = await readJsonObject(req);
   if (!body) return error("bad_request", 400);
   if (typeof body.question_id !== "string") return error("unknown_question", 400);
-  const question = findQuestion(body.question_id);
-  if (!question) return error("unknown_question", 400);
 
   const row = await getCode(env.DB, session.code);
   if (!row) return error("unauthorized", 401);
+  // A job Question ("job-1") only exists for a code with a job brief; the fixed set always does.
+  const brief = readBrief(row.job_brief);
+  const question = resolveQuestion(body.question_id, brief);
+  if (!question) return error("unknown_question", 400);
   // Before spending: a Round without a Voice clone could never reach its Replay.
   if (!row.voice_id) return error("voice_required", 409);
 
@@ -37,7 +40,7 @@ export async function startRound(
   if (!(await spendRound(env.DB, session.code, now))) return error("allowance_used", 403);
 
   const roundId = crypto.randomUUID();
-  await insertRound(env.DB, { id: roundId, code: session.code, question_id: question.id });
+  await insertRound(env.DB, { id: roundId, code: session.code, question_id: question.id, question_text: question.text });
 
   let token: string;
   try {
@@ -58,6 +61,7 @@ export async function startRound(
     conversation_token: token,
     question: { id: question.id, text: question.text },
     allowance_left: allowanceLeft,
+    dynamic_variables: { question_id: question.id, question_text: question.text, ...jobVariables(brief) },
   };
   return json(res);
 }

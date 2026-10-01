@@ -1,4 +1,8 @@
-// The fixed Question set (CONTEXT.md). Aimed at AI engineers; English for Tier A.
+// The fixed Question set (CONTEXT.md). Aimed at AI engineers; English for Tier A. A Guest with
+// a target job gets three job Questions instead (JobBrief.questions, ids "job-1".."job-3");
+// the fixed set stays as the fallback for a Guest who skips the job.
+import type { JobBrief } from "./api";
+
 export type Question = { id: string; text: string };
 
 export const QUESTIONS: Question[] = [
@@ -9,4 +13,9 @@ export const QUESTIONS: Question[] = [
 
 export function findQuestion(id: string): Question | undefined {
   return QUESTIONS.find((q) => q.id === id);
+}
+
+/** A Question from the Guest's job brief, or else from the fixed set. */
+export function resolveQuestion(id: string, job: JobBrief | null): Question | undefined {
+  return job?.questions.find((q) => q.id === id) ?? findQuestion(id);
 }

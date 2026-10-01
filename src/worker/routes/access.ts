@@ -6,6 +6,7 @@ import type { Me, RedeemRequest } from "../../shared/api";
 import type { Env, Session } from "../env";
 import { getCode, normaliseCode, setContact, type CodeRow } from "../db";
 import { error, json, readJsonObject } from "../http";
+import { readBrief } from "../job";
 import { sessionCookie } from "../session";
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -26,6 +27,8 @@ export function toMe(row: CodeRow): Me {
     used: row.used,
     hasContact: row.contact !== null,
     hasVoice: row.voice_id !== null,
+    job: readBrief(row.job_brief),
+    jobSource: row.job_source,
   };
 }
 

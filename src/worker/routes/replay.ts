@@ -15,6 +15,7 @@ import { error, json, readJsonObject } from "../http";
 import { chatText } from "../nebius";
 import { bestSelfAnswer } from "../rewrite";
 import { extractFinalAnswer } from "../transcript";
+import { jobTitle, readBrief } from "../job";
 
 export const POLL_INTERVAL_MS = 1500;
 export const MAX_POLLS = 20;
@@ -81,9 +82,12 @@ export async function replay(
     return error(final.reason, 422);
   }
 
-  const question = findQuestion(round.question_id)?.text ?? "";
+  const question = round.question_text ?? findQuestion(round.question_id)?.text ?? "";
+  // The job steers emphasis only; the guard rules still reject anything the Guest did not say.
+  const brief = readBrief((await getCode(env.DB, session.code))?.job_brief ?? null);
+  const job = brief ? `${jobTitle(brief)}. It needs: ${brief.needs.join("; ")}.` : "a general interview";
   const rewrite = await bestSelfAnswer(
-    { question, answer: final.answer },
+    { question, answer: final.answer, job },
     { model: env.REWRITE_MODEL, chatText: (args) => chatText(env, args, fetchImpl) },
   );
 

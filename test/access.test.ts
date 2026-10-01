@@ -73,7 +73,7 @@ describe("redeem", () => {
     const res = await redeem(post({ code: ` ${code.toLowerCase()} `, contact: " mel@example.com " }), env);
     expect(res.status).toBe(200);
     const body = (await res.json()) as Me;
-    expect(body).toEqual({ kind: "guest", allowance: 3, used: 0, hasContact: true, hasVoice: false });
+    expect(body).toEqual({ kind: "guest", allowance: 3, used: 0, hasContact: true, hasVoice: false, job: null, jobSource: null });
     expect((await getCode(env.DB, code))!.contact).toBe("mel@example.com");
 
     const cookie = setCookieOf(res)!;
@@ -109,7 +109,7 @@ describe("me", () => {
     await setContact(env.DB, code, "@mel");
     const res = await me(req, env, { code });
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ kind: "guest", allowance: 3, used: 0, hasContact: true, hasVoice: false });
+    expect(await res.json()).toEqual({ kind: "guest", allowance: 3, used: 0, hasContact: true, hasVoice: false, job: null, jobSource: null });
   });
 
   it("401 unauthorized when the signed code no longer exists", async () => {

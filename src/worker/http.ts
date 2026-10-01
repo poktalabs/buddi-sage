@@ -19,7 +19,10 @@ export type ErrorCode =
   | "no_save_answer"
   | "empty_answer"
   | "upstream_error"
-  | "rate_limited";
+  | "rate_limited"
+  | "job_fetch_failed"
+  | "job_unreadable"
+  | "job_limit";
 
 export function json(body: unknown, status = 200, headers: HeadersInit = {}): Response {
   const h = new Headers(headers);

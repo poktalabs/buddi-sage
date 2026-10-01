@@ -18,6 +18,9 @@ export type CodeRow = {
   note: string | null;
   created_at: string;
   last_used_at: string | null;
+  job_source: string | null;
+  job_brief: string | null;
+  job_sets: number;
 };
 
 export type RoundStatus = "started" | "replayed" | "fallback" | "failed";
@@ -33,6 +36,7 @@ export type RoundRow = {
   created_at: string;
   final_answer: string | null;
   best_self_text: string | null;
+  question_text: string | null;
 };
 
 // Uppercase letters and digits without the look-alikes I, O, 0 and 1. 32 symbols, so a random
@@ -122,12 +126,29 @@ export async function listVoicesToClean(db: D1Database, now: Date): Promise<{ co
   return res.results;
 }
 
+/** The job a code request named, so the Guest finds it ready on the job screen. */
+export async function setJobSource(db: D1Database, code: string, source: string): Promise<void> {
+  await db.prepare("UPDATE codes SET job_source = ? WHERE code = ?").bind(source, code).run();
+}
+
+/**
+ * Stores a new job brief and counts it, only while the code is under `maxSets`; false when the
+ * cap is reached (each brief is a model call).
+ */
+export async function setJobBrief(db: D1Database, code: string, source: string, briefJson: string, maxSets: number): Promise<boolean> {
+  const res = await db
+    .prepare("UPDATE codes SET job_source = ?, job_brief = ?, job_sets = job_sets + 1 WHERE code = ? AND job_sets < ?")
+    .bind(source, briefJson, code, maxSets)
+    .run();
+  return res.meta.changes === 1;
+}
+
 // Rounds
 
-export async function insertRound(db: D1Database, args: { id: string; code: string; question_id: string }): Promise<void> {
+export async function insertRound(db: D1Database, args: { id: string; code: string; question_id: string; question_text?: string }): Promise<void> {
   await db
-    .prepare("INSERT INTO rounds (id, code, question_id) VALUES (?, ?, ?)")
-    .bind(args.id, args.code, args.question_id)
+    .prepare("INSERT INTO rounds (id, code, question_id, question_text) VALUES (?, ?, ?, ?)")
+    .bind(args.id, args.code, args.question_id, args.question_text ?? null)
     .run();
 }
 

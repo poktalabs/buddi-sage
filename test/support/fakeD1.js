@@ -126,6 +126,7 @@ export function testEnv(overrides = {}) {
     NEBIUS_API_BASE: "https://nebius.test/v1",
     COACH_MODEL: "coach-model",
     REWRITE_MODEL: "rewrite-model",
+    JOB_MODEL: "job-model",
     TTS_MODEL: "tts-model",
     AGENT_ID: "agent-test",
     ELEVENLABS_API_KEY: "test-eleven-key",
