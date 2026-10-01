@@ -1,71 +1,101 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 300" role="img" aria-label="Sage, a bearded wizard coach with one eyebrow raised, asking a question while sound waves flow toward a sparkle">
-  <!-- BUDDi port-kit colours: ink #0a0a0a, panel #fff, paper-dark #fff0e8, violet #7c3aed, gold #ffb800. Magenta stays reserved for the call to action. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 460" role="img" aria-label="Sage Mode: a coach meditating on a lily pad with gold markings over closed eyes, a toad meditating beside them, natural energy swirling in and a voice waveform flowing out">
+  <!-- BUDDi port-kit colours: ink #0a0a0a, panel #fff, paper-dark #fff0e8, violet #7c3aed, gold #ffb800, green #15803d. Magenta stays reserved for the call to action. Each solid shape is drawn twice: an ink copy offset 6px (the zero-blur shadow), then the fill. -->
+  <defs>
+    <circle id="sun" cx="270" cy="200" r="150"/>
+    <path id="pad" d="M100 392 A170 32 0 1 1 440 392 A170 32 0 1 1 100 392 Z"/>
+    <path id="legs" d="M150 372 Q144 318 212 308 L328 308 Q396 318 390 372 Q270 394 150 372 Z"/>
+    <path id="torso" d="M212 226 Q270 204 328 226 L338 324 L202 324 Z"/>
+    <circle id="head" cx="270" cy="158" r="50"/>
+    <path id="toadpad" d="M28 404 A72 16 0 1 1 172 404 A72 16 0 1 1 28 404 Z"/>
+    <ellipse id="toad" cx="100" cy="372" rx="44" ry="32"/>
+    <path id="leaf" d="M0 0 Q15 -13 30 0 Q15 13 0 0 Z"/>
+    <path id="star" d="M0 -14 Q2 -2 14 0 Q2 2 0 14 Q-2 2 -14 0 Q-2 -2 0 -14 Z"/>
+  </defs>
+
   <g stroke="#0a0a0a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
 
-    <!-- Question bubble: Sage asks -->
-    <path d="M26 40 H88 A8 8 0 0 1 96 48 V94 A8 8 0 0 1 88 102 H84 L94 124 L66 102 H26 A8 8 0 0 1 18 94 V48 A8 8 0 0 1 26 40 Z" fill="#0a0a0a" transform="translate(5 5)"/>
-    <path d="M26 40 H88 A8 8 0 0 1 96 48 V94 A8 8 0 0 1 88 102 H84 L94 124 L66 102 H26 A8 8 0 0 1 18 94 V48 A8 8 0 0 1 26 40 Z" fill="#fff"/>
-    <text x="57" y="88" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="46" font-weight="800" text-anchor="middle" fill="#7c3aed" stroke="none">?</text>
+    <!-- The sun: the stillness Sage draws energy from -->
+    <use href="#sun" fill="#0a0a0a" transform="translate(6 6)"/>
+    <use href="#sun" fill="#ffb800"/>
+    <circle cx="270" cy="200" r="118" fill="none" stroke-width="2.5" stroke-dasharray="2 12"/>
 
-    <!-- Hat -->
-    <path d="M117 116 L167 23 Q172 18 176 24 L207 116 Z" fill="#0a0a0a" transform="translate(5 5)"/>
-    <path d="M112 112 L162 19 Q167 14 171 20 L202 112 Z" fill="#7c3aed"/>
-    <path d="M140 52 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3 Z" fill="#ffb800" stroke-width="2"/>
-    <path d="M170 78 l2.5 5.5 5.5 2.5 -5.5 2.5 -2.5 5.5 -2.5 -5.5 -5.5 -2.5 5.5 -2.5 Z" fill="#ffb800" stroke-width="2"/>
-    <circle cx="160" cy="44" r="3" fill="#fff" stroke-width="2"/>
+    <!-- Natural energy swirls flowing in from both sides -->
+    <path d="M30 150 C70 70 170 80 150 140 C136 182 88 160 104 132 C114 116 136 124 130 138" fill="none" stroke="#7c3aed" stroke-width="7"/>
+    <path d="M150 140 C176 186 186 220 214 246" fill="none" stroke="#7c3aed" stroke-width="5" stroke-dasharray="1 12"/>
+    <path d="M494 250 C470 320 380 330 386 276 C390 240 432 246 426 270 C422 284 404 284 404 272" fill="none" stroke="#7c3aed" stroke-width="7"/>
+    <path d="M386 276 C366 270 346 262 328 252" fill="none" stroke="#7c3aed" stroke-width="5" stroke-dasharray="1 12"/>
 
-    <!-- Head -->
-    <circle cx="163" cy="173" r="58" fill="#0a0a0a"/>
-    <circle cx="158" cy="168" r="58" fill="#fff"/>
+    <!-- The voice going out: a waveform rising off the sun -->
+    <path d="M346 70 l10 -18 l10 34 l10 -50 l10 64 l10 -46 l10 30 l10 -14" fill="none" stroke="#0a0a0a" stroke-width="5"/>
 
-    <!-- Hat brim over the head -->
-    <ellipse cx="163" cy="121" rx="66" ry="13" fill="#0a0a0a"/>
-    <ellipse cx="158" cy="116" rx="66" ry="13" fill="#7c3aed"/>
+    <!-- Lily pad, with its notch -->
+    <use href="#pad" fill="#0a0a0a" transform="translate(6 6)"/>
+    <use href="#pad" fill="#15803d"/>
+    <path d="M270 392 L300 362 M270 392 L318 368" fill="none" stroke-width="3"/>
 
-    <!-- Brows: one flat, one raised (the pushback) -->
-    <path d="M124 142 L148 145" stroke-width="6"/>
-    <path d="M166 141 Q179 128 194 137" stroke-width="6" fill="none"/>
+    <!-- Seated in lotus: legs, feet -->
+    <use href="#legs" fill="#0a0a0a" transform="translate(6 6)"/>
+    <use href="#legs" fill="#3a3a3a"/>
+    <ellipse cx="218" cy="344" rx="22" ry="10" fill="#fff"/>
+    <ellipse cx="322" cy="344" rx="22" ry="10" fill="#fff"/>
 
-    <!-- Glasses and eyes -->
-    <circle cx="137" cy="163" r="15" fill="#fff0e8" stroke-width="4"/>
-    <circle cx="180" cy="163" r="15" fill="#fff0e8" stroke-width="4"/>
-    <path d="M152 162 Q158.5 157 165 162" fill="none" stroke-width="4"/>
-    <circle cx="139" cy="165" r="5.5" fill="#0a0a0a" stroke="none"/>
-    <circle cx="182" cy="165" r="5.5" fill="#0a0a0a" stroke="none"/>
-    <circle cx="141" cy="163" r="1.8" fill="#fff" stroke="none"/>
-    <circle cx="184" cy="163" r="1.8" fill="#fff" stroke="none"/>
+    <!-- Torso and arms (violet jacket) -->
+    <use href="#torso" fill="#0a0a0a" transform="translate(6 6)"/>
+    <path d="M214 230 Q176 272 172 346 L200 352 Q204 288 230 256 Z" fill="#7c3aed"/>
+    <path d="M326 230 Q364 272 368 346 L340 352 Q336 288 310 256 Z" fill="#7c3aed"/>
+    <use href="#torso" fill="#7c3aed"/>
+    <path d="M250 214 L270 250 L290 214" fill="none" stroke-width="3"/>
 
-    <!-- Beard shaped like a voice waveform -->
-    <path d="M110 186 Q110 228 128 250 L136 236 L144 266 L152 240 L160 272 L168 240 L176 262 L184 236 L190 248 Q208 226 207 186 Q158 206 110 186 Z" fill="#0a0a0a" transform="translate(5 5)"/>
-    <path d="M110 186 Q110 228 128 250 L136 236 L144 266 L152 240 L160 272 L168 240 L176 262 L184 236 L190 248 Q208 226 207 186 Q158 206 110 186 Z" fill="#fff"/>
-    <path d="M145 203 Q158.5 213 172 203" fill="none" stroke-width="4"/>
+    <!-- Hands resting on the knees, thumb and finger touching -->
+    <circle cx="186" cy="352" r="14" fill="#fff"/>
+    <circle cx="186" cy="352" r="4.5" fill="#ffb800" stroke-width="2.5"/>
+    <circle cx="354" cy="352" r="14" fill="#fff"/>
+    <circle cx="354" cy="352" r="4.5" fill="#ffb800" stroke-width="2.5"/>
 
-    <!-- Sound waves out of Sage -->
-    <path d="M226 150 Q236 168 226 186" fill="none" stroke-width="5"/>
-    <path d="M240 140 Q254 168 240 196" fill="none" stroke-width="5"/>
-    <path d="M254 130 Q272 168 254 206" fill="none" stroke="#7c3aed" stroke-width="5"/>
+    <!-- Neck and head -->
+    <rect x="256" y="196" width="28" height="22" fill="#fff"/>
+    <use href="#head" fill="#0a0a0a" transform="translate(6 6)"/>
+    <use href="#head" fill="#fff"/>
 
-    <!-- Best-self sparkle -->
-    <rect x="273" y="57" width="74" height="74" rx="8" fill="#0a0a0a"/>
-    <rect x="268" y="52" width="74" height="74" rx="8" fill="#ffb800"/>
-    <path d="M305 64 Q309 85 330 89 Q309 93 305 114 Q301 93 280 89 Q301 85 305 64 Z" fill="#fff"/>
+    <!-- Hair with a top knot -->
+    <path d="M221 150 Q224 102 270 102 Q316 102 319 150 Q296 126 270 128 Q244 126 221 150 Z" fill="#0a0a0a"/>
+    <circle cx="270" cy="94" r="16" fill="#0a0a0a"/>
+    <path d="M258 98 Q270 90 282 98" fill="none" stroke="#ffb800" stroke-width="3"/>
 
-    <!-- Voice level bars -->
-    <g transform="translate(5 5)" fill="#0a0a0a">
-      <rect x="270" y="236" width="12" height="30" rx="3"/>
-      <rect x="288" y="214" width="12" height="52" rx="3"/>
-      <rect x="306" y="226" width="12" height="40" rx="3"/>
-      <rect x="324" y="200" width="12" height="66" rx="3"/>
-    </g>
-    <rect x="270" y="236" width="12" height="30" rx="3" fill="#7c3aed"/>
-    <rect x="288" y="214" width="12" height="52" rx="3" fill="#ffb800"/>
-    <rect x="306" y="226" width="12" height="40" rx="3" fill="#7c3aed"/>
-    <rect x="324" y="200" width="12" height="66" rx="3" fill="#ffb800"/>
+    <!-- Sage markings: gold pigment over closed eyes, a mark on the brow -->
+    <path d="M233 164 Q249 144 266 162 Q249 156 233 164 Z" fill="#ffb800" stroke-width="2.5"/>
+    <path d="M274 162 Q291 144 307 164 Q291 156 274 162 Z" fill="#ffb800" stroke-width="2.5"/>
+    <path d="M270 134 L276 141 L270 148 L264 141 Z" fill="#ffb800" stroke-width="2.5"/>
+    <path d="M238 168 Q250 177 262 168" fill="none" stroke-width="4"/>
+    <path d="M278 168 Q290 177 302 168" fill="none" stroke-width="4"/>
+    <path d="M261 190 Q270 197 279 190" fill="none" stroke-width="3.5"/>
 
-    <!-- Loose sparkles -->
-    <path d="M40 200 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3 Z" fill="#ffb800" stroke-width="2"/>
-    <path d="M250 40 l2.5 5.5 5.5 2.5 -5.5 2.5 -2.5 5.5 -2.5 -5.5 -5.5 -2.5 5.5 -2.5 Z" fill="#7c3aed" stroke-width="2"/>
-    <circle cx="70" cy="250" r="5" fill="#fff"/>
-    <circle cx="232" cy="262" r="4" fill="#7c3aed"/>
+    <!-- The toad, also meditating, on its own pad -->
+    <use href="#toadpad" fill="#0a0a0a" transform="translate(5 5)"/>
+    <use href="#toadpad" fill="#15803d"/>
+    <use href="#toad" fill="#0a0a0a" transform="translate(5 5)"/>
+    <use href="#toad" fill="#ffb800"/>
+    <circle cx="80" cy="344" r="14" fill="#ffb800"/>
+    <circle cx="120" cy="344" r="14" fill="#ffb800"/>
+    <path d="M72 346 Q80 352 88 346" fill="none" stroke-width="3"/>
+    <path d="M112 346 Q120 352 128 346" fill="none" stroke-width="3"/>
+    <path d="M78 378 Q100 390 122 378" fill="none" stroke-width="3"/>
+    <ellipse cx="74" cy="400" rx="12" ry="6" fill="#ffb800"/>
+    <ellipse cx="126" cy="400" rx="12" ry="6" fill="#ffb800"/>
+
+    <!-- Leaves carried on the energy -->
+    <use href="#leaf" fill="#15803d" transform="translate(40 196) rotate(-24)"/>
+    <use href="#leaf" fill="#15803d" transform="translate(176 52) rotate(28)"/>
+    <use href="#leaf" fill="#15803d" transform="translate(452 168) rotate(150)"/>
+    <use href="#leaf" fill="#15803d" transform="translate(456 330) rotate(-32)"/>
+
+    <!-- Sparkles -->
+    <use href="#star" fill="#fff" transform="translate(208 40)" stroke-width="2.5"/>
+    <use href="#star" fill="#7c3aed" transform="translate(470 60) scale(0.8)" stroke-width="2.5"/>
+    <use href="#star" fill="#fff" transform="translate(150 318) scale(0.7)" stroke-width="2.5"/>
+
+    <!-- Still water -->
+    <path d="M40 440 q15 -8 30 0 t30 0 t30 0" fill="none"/>
+    <path d="M330 442 q15 -8 30 0 t30 0 t30 0 t30 0" fill="none"/>
   </g>
 </svg>
