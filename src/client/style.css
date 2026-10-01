@@ -203,9 +203,16 @@ audio { width: 100%; margin: 0 0 12px; }
 
 /* Landing: hero, the two calls to action side by side, how it works, notes. */
 .landing { padding: 8px 0 0; }
-.hero { margin: 8px 0 20px; }
+/* Hero: text and Sage side by side; on a phone Sage stays small beside the headline so both
+   calls to action stay near the top. */
+.hero { margin: 8px 0 20px; display: grid; grid-template-columns: 1fr 112px; grid-template-areas: "text art" "lede lede"; gap: 0 12px; align-items: center; }
+.hero-text { grid-area: text; }
+.hero-art { grid-area: art; width: 100%; height: auto; }
+.lede { grid-area: lede; max-width: 40rem; }
 .hero h1 { font-size: 1.875rem; margin-bottom: 0.75rem; }
-.lede { max-width: 40rem; }
+@media (min-width: 720px) {
+  .hero { grid-template-columns: 1fr 260px; grid-template-areas: "text art" "lede art"; gap: 0 24px; }
+}
 .cta-grid { display: grid; grid-template-columns: 1fr; gap: 20px; align-items: start; }
 @media (min-width: 720px) { .cta-grid { grid-template-columns: 1fr 1fr; } }
 .cta-card { margin: 0; }

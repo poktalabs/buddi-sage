@@ -267,7 +267,13 @@ function showLanding(message?: string) {
     h(
       "div",
       { class: "landing" },
-      h("section", { class: "hero" }, h("p", { class: "kicker" }, t.kicker), h("h1", { tabIndex: -1 }, t.headline), h("p", { class: "reading lede" }, t.lede)),
+      h(
+        "section",
+        { class: "hero" },
+        h("div", { class: "hero-text" }, h("p", { class: "kicker" }, t.kicker), h("h1", { tabIndex: -1 }, t.headline)),
+        h("img", { class: "hero-art", src: "/sage-hero.svg", alt: "", width: 360, height: 300 }),
+        h("p", { class: "reading lede" }, t.lede),
+      ),
       h("div", { class: "cta-grid" }, h("section", { class: "ds-card cta-card" }, h("h2", {}, t.haveCode.title), codeForm), requestCard),
       h(
         "section",

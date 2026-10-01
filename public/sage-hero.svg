@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 300" role="img" aria-label="Sage, a bearded wizard coach with one eyebrow raised, asking a question while sound waves flow toward a sparkle">
+  <!-- BUDDi port-kit colours: ink #0a0a0a, panel #fff, paper-dark #fff0e8, violet #7c3aed, gold #ffb800. Magenta stays reserved for the call to action. -->
+  <g stroke="#0a0a0a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+
+    <!-- Question bubble: Sage asks -->
+    <path d="M26 40 H88 A8 8 0 0 1 96 48 V94 A8 8 0 0 1 88 102 H84 L94 124 L66 102 H26 A8 8 0 0 1 18 94 V48 A8 8 0 0 1 26 40 Z" fill="#0a0a0a" transform="translate(5 5)"/>
+    <path d="M26 40 H88 A8 8 0 0 1 96 48 V94 A8 8 0 0 1 88 102 H84 L94 124 L66 102 H26 A8 8 0 0 1 18 94 V48 A8 8 0 0 1 26 40 Z" fill="#fff"/>
+    <text x="57" y="88" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="46" font-weight="800" text-anchor="middle" fill="#7c3aed" stroke="none">?</text>
+
+    <!-- Hat -->
+    <path d="M117 116 L167 23 Q172 18 176 24 L207 116 Z" fill="#0a0a0a" transform="translate(5 5)"/>
+    <path d="M112 112 L162 19 Q167 14 171 20 L202 112 Z" fill="#7c3aed"/>
+    <path d="M140 52 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3 Z" fill="#ffb800" stroke-width="2"/>
+    <path d="M170 78 l2.5 5.5 5.5 2.5 -5.5 2.5 -2.5 5.5 -2.5 -5.5 -5.5 -2.5 5.5 -2.5 Z" fill="#ffb800" stroke-width="2"/>
+    <circle cx="160" cy="44" r="3" fill="#fff" stroke-width="2"/>
+
+    <!-- Head -->
+    <circle cx="163" cy="173" r="58" fill="#0a0a0a"/>
+    <circle cx="158" cy="168" r="58" fill="#fff"/>
+
+    <!-- Hat brim over the head -->
+    <ellipse cx="163" cy="121" rx="66" ry="13" fill="#0a0a0a"/>
+    <ellipse cx="158" cy="116" rx="66" ry="13" fill="#7c3aed"/>
+
+    <!-- Brows: one flat, one raised (the pushback) -->
+    <path d="M124 142 L148 145" stroke-width="6"/>
+    <path d="M166 141 Q179 128 194 137" stroke-width="6" fill="none"/>
+
+    <!-- Glasses and eyes -->
+    <circle cx="137" cy="163" r="15" fill="#fff0e8" stroke-width="4"/>
+    <circle cx="180" cy="163" r="15" fill="#fff0e8" stroke-width="4"/>
+    <path d="M152 162 Q158.5 157 165 162" fill="none" stroke-width="4"/>
+    <circle cx="139" cy="165" r="5.5" fill="#0a0a0a" stroke="none"/>
+    <circle cx="182" cy="165" r="5.5" fill="#0a0a0a" stroke="none"/>
+    <circle cx="141" cy="163" r="1.8" fill="#fff" stroke="none"/>
+    <circle cx="184" cy="163" r="1.8" fill="#fff" stroke="none"/>
+
+    <!-- Beard shaped like a voice waveform -->
+    <path d="M110 186 Q110 228 128 250 L136 236 L144 266 L152 240 L160 272 L168 240 L176 262 L184 236 L190 248 Q208 226 207 186 Q158 206 110 186 Z" fill="#0a0a0a" transform="translate(5 5)"/>
+    <path d="M110 186 Q110 228 128 250 L136 236 L144 266 L152 240 L160 272 L168 240 L176 262 L184 236 L190 248 Q208 226 207 186 Q158 206 110 186 Z" fill="#fff"/>
+    <path d="M145 203 Q158.5 213 172 203" fill="none" stroke-width="4"/>
+
+    <!-- Sound waves out of Sage -->
+    <path d="M226 150 Q236 168 226 186" fill="none" stroke-width="5"/>
+    <path d="M240 140 Q254 168 240 196" fill="none" stroke-width="5"/>
+    <path d="M254 130 Q272 168 254 206" fill="none" stroke="#7c3aed" stroke-width="5"/>
+
+    <!-- Best-self sparkle -->
+    <rect x="273" y="57" width="74" height="74" rx="8" fill="#0a0a0a"/>
+    <rect x="268" y="52" width="74" height="74" rx="8" fill="#ffb800"/>
+    <path d="M305 64 Q309 85 330 89 Q309 93 305 114 Q301 93 280 89 Q301 85 305 64 Z" fill="#fff"/>
+
+    <!-- Voice level bars -->
+    <g transform="translate(5 5)" fill="#0a0a0a">
+      <rect x="270" y="236" width="12" height="30" rx="3"/>
+      <rect x="288" y="214" width="12" height="52" rx="3"/>
+      <rect x="306" y="226" width="12" height="40" rx="3"/>
+      <rect x="324" y="200" width="12" height="66" rx="3"/>
+    </g>
+    <rect x="270" y="236" width="12" height="30" rx="3" fill="#7c3aed"/>
+    <rect x="288" y="214" width="12" height="52" rx="3" fill="#ffb800"/>
+    <rect x="306" y="226" width="12" height="40" rx="3" fill="#7c3aed"/>
+    <rect x="324" y="200" width="12" height="66" rx="3" fill="#ffb800"/>
+
+    <!-- Loose sparkles -->
+    <path d="M40 200 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3 Z" fill="#ffb800" stroke-width="2"/>
+    <path d="M250 40 l2.5 5.5 5.5 2.5 -5.5 2.5 -2.5 5.5 -2.5 -5.5 -5.5 -2.5 5.5 -2.5 Z" fill="#7c3aed" stroke-width="2"/>
+    <circle cx="70" cy="250" r="5" fill="#fff"/>
+    <circle cx="232" cy="262" r="4" fill="#7c3aed"/>
+  </g>
+</svg>
