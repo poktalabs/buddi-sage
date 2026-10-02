@@ -78,6 +78,20 @@ export async function createCodes(
   return codes;
 }
 
+export type CodeListRow = Omit<CodeRow, "voice_id" | "voice_created_at" | "job_source" | "job_brief" | "job_sets"> & { has_voice: number };
+
+/** Every code, newest first, for the owner dashboard. No Voice ids and no job text leave here. */
+export async function listCodes(db: D1Database, limit: number): Promise<CodeListRow[]> {
+  const res = await db
+    .prepare(
+      `SELECT code, kind, allowance, used, contact, voice_id IS NOT NULL AS has_voice, note, created_at, last_used_at
+       FROM codes ORDER BY created_at DESC, code LIMIT ?`,
+    )
+    .bind(limit)
+    .all<CodeListRow>();
+  return res.results;
+}
+
 export async function setContact(db: D1Database, code: string, contact: string): Promise<void> {
   await db.prepare("UPDATE codes SET contact = ? WHERE code = ?").bind(contact, code).run();
 }

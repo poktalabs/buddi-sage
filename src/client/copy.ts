@@ -4,6 +4,7 @@
 
 export const FAILURE_COPY: Record<string, string> = {
   unauthorized: "Your Session has ended. Enter your code again to continue.",
+  forbidden: "Only an owner code can open the dashboard.",
   bad_request: "Something in that request was not right. Please try again.",
   invalid_code: "That code does not work. Check it and try again.",
   contact_required: "Add an email or X handle the first time you use this code.",

@@ -39,6 +39,8 @@ const SESSION_ROUTES: [string, string][] = [
   ["POST", "/api/rounds"],
   ["POST", "/api/rounds/r1/replay"],
   ["GET", "/api/rounds/r1/audio"],
+  ["GET", "/api/dashboard"],
+  ["POST", "/api/dashboard/codes"],
 ];
 
 describe("router", () => {
@@ -74,6 +76,10 @@ describe("router", () => {
   ];
   it.each(WAVE_2_FIRST_CHECK)("%s %s is wired to its Wave 2 handler", async (method, path, status, error) => {
     expect(await call(req(method, path, { cookie }))).toEqual({ status, error });
+  });
+
+  it.each([["GET", "/api/dashboard"], ["POST", "/api/dashboard/codes"]])("%s %s is wired to the owner check", async (method, path) => {
+    expect(await call(req(method, path, { cookie }))).toEqual({ status: 403, error: "forbidden" });
   });
 
   it("POST /api/redeem needs no cookie", async () => {

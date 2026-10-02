@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import type { AdminCreateCodesResponse, ApiError } from "../src/shared/api";
+import type { AdminCreateCodesResponse, ApiError, DashboardResponse } from "../src/shared/api";
 import type { Env } from "../src/worker/env";
-import { getCode } from "../src/worker/db";
-import { createCodes } from "../src/worker/routes/admin";
+import { createCodes as insertCodes, getCode, setContact, setVoice, spendRound } from "../src/worker/db";
+import { createCodes, dashboard, dashboardCreateCodes } from "../src/worker/routes/admin";
 import { testEnv } from "./support/fakeD1";
 
 let env: Env;
@@ -88,5 +88,70 @@ describe("createCodes", () => {
       expect(((await res.json()) as ApiError).error).toBe("bad_request");
     }
     expect((await env.DB.prepare("SELECT COUNT(*) AS n FROM codes").first<{ n: number }>())!.n).toBe(0);
+  });
+});
+
+describe("owner dashboard", () => {
+  let owner: string;
+  let guest: string;
+  beforeEach(async () => {
+    [owner] = (await insertCodes(env.DB, { kind: "owner", count: 1, allowance: 100 })) as [string];
+    [guest] = (await insertCodes(env.DB, { kind: "guest", count: 1, allowance: 3, note: "friends" })) as [string];
+  });
+
+  const get = () => new Request("https://sage.test/api/dashboard");
+  const issue = (body: unknown) =>
+    new Request("https://sage.test/api/dashboard/codes", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+
+  it("403 forbidden for a Guest or Gift Session, on both routes", async () => {
+    const [gift] = (await insertCodes(env.DB, { kind: "gift", count: 1, allowance: 10 })) as [string];
+    for (const code of [guest, gift!]) {
+      for (const res of [await dashboard(get(), env, { code }), await dashboardCreateCodes(issue({ kind: "guest" }), env, { code })]) {
+        expect(res.status).toBe(403);
+        expect(((await res.json()) as ApiError).error).toBe("forbidden");
+      }
+    }
+  });
+
+  it("lists every code with usage, Contact and whether a Voice clone exists, never the Voice id", async () => {
+    await setContact(env.DB, guest, "@ana.dev");
+    await setVoice(env.DB, guest, "voice_secret_id", new Date());
+    await spendRound(env.DB, guest, new Date("2026-10-01T10:00:00.000Z"));
+    const res = await dashboard(get(), env, { code: owner });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as DashboardResponse;
+    expect(body.codes.map((c) => c.code).sort()).toEqual([owner, guest].sort());
+    expect(body.codes.find((c) => c.code === guest)).toMatchObject({
+      kind: "guest",
+      allowance: 3,
+      used: 1,
+      contact: "@ana.dev",
+      hasVoice: true,
+      note: "friends",
+      lastUsedAt: "2026-10-01T10:00:00.000Z",
+    });
+    expect(body.codes.find((c) => c.code === owner)).toMatchObject({ kind: "owner", hasVoice: false, contact: null });
+    expect(JSON.stringify(body)).not.toContain("voice_secret_id");
+    expect(body.pendingRequests).toBe(0);
+  });
+
+  it("issues Guest and Gift codes with the same defaults and limits as /admin/codes", async () => {
+    const ok = async (body: unknown) => {
+      const res = await dashboardCreateCodes(issue(body), env, { code: owner });
+      expect(res.status).toBe(200);
+      return ((await res.json()) as AdminCreateCodesResponse).codes;
+    };
+    const guests = await ok({ kind: "guest", count: 3, note: "  recruiter demo  " });
+    expect(guests).toHaveLength(3);
+    expect(await getCode(env.DB, guests[0]!)).toMatchObject({ kind: "guest", allowance: 3, note: "recruiter demo" });
+    const [gift] = await ok({ kind: "gift", allowance: 10, note: "" });
+    expect(await getCode(env.DB, gift!)).toMatchObject({ kind: "gift", allowance: 10, note: null });
+  });
+
+  it("400 for an owner code, a Gift without Rounds, or a count past the limit", async () => {
+    for (const body of [{ kind: "owner" }, { kind: "gift" }, { kind: "guest", count: 51 }, { kind: "guest", note: 5 }]) {
+      const res = await dashboardCreateCodes(issue(body), env, { code: owner });
+      expect(res.status, JSON.stringify(body)).toBe(400);
+    }
   });
 });

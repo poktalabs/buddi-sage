@@ -5,10 +5,10 @@
 // separate chunk the real page never fetches.
 //
 // Mock codes: any code works; one containing "BAD" is invalid_code, one containing
-// "OWNER" gets an owner Allowance. Setting a job always yields MOCK_JOB. The first redeem needs a Contact. The Question
+// "OWNER" gets an owner Allowance and opens the dashboard over a few canned codes. Setting a job always yields MOCK_JOB. The first redeem needs a Contact. The Question
 // "why-this-role" answers with status fallback, so that copy can be seen. The canned
 // Best-self answer adds no fact the canned Answer lacks, like the real one must not.
-import type { CodeKind, JobBrief, Me, ReplayResponse, StartRoundResponse } from "../shared/api";
+import type { CodeKind, DashboardCode, JobBrief, Me, ReplayResponse, StartRoundResponse } from "../shared/api";
 import { resolveQuestion } from "../shared/questions";
 import { ApiFailure, type ClientApi } from "./api";
 import type { LiveSession, SessionOptions } from "./round";
@@ -39,6 +39,16 @@ export function mockApi(delayMs = 350): ClientApi {
   let job: JobBrief | null = null;
   let jobSource: string | null = null;
   const rounds = new Map<string, MockRound>();
+  const mockCodes: DashboardCode[] = [
+    { code: "SAGE-OWNR-MOCK", kind: "owner", allowance: 100, used: 4, contact: "mel@example.com", hasVoice: true, note: null, createdAt: "2026-10-01 02:20:43", lastUsedAt: "2026-10-01T03:02:11.000Z" },
+    { code: "SAGE-FRND-AAAA", kind: "guest", allowance: 3, used: 1, contact: "@ana.dev", hasVoice: true, note: "friends", createdAt: "2026-10-01 04:51:36", lastUsedAt: "2026-10-01T18:40:00.000Z" },
+    { code: "SAGE-FRND-BBBB", kind: "guest", allowance: 3, used: 0, contact: null, hasVoice: false, note: "friends", createdAt: "2026-10-01 04:51:36", lastUsedAt: null },
+    { code: "SAGE-GIFT-CCCC", kind: "gift", allowance: 10, used: 0, contact: null, hasVoice: false, note: "recruiter demo", createdAt: "2026-10-01 21:04:47", lastUsedAt: null },
+  ];
+  const requireOwner = () => {
+    requireSession();
+    if (kind !== "owner") throw new ApiFailure(403, "forbidden");
+  };
 
   const me = (): Me => ({ kind, allowance, used, hasContact, hasVoice, job, jobSource });
   const requireSession = () => {
@@ -145,6 +155,25 @@ export function mockApi(delayMs = 350): ClientApi {
       await sleep(delayMs);
       requireSession();
       return toneWav(1.5);
+    },
+    async dashboard() {
+      await sleep(delayMs);
+      requireOwner();
+      return { codes: [...mockCodes], rounds: [{ status: "replayed", n: 5 }], pendingRequests: 1 };
+    },
+    async createCodes(req) {
+      await sleep(delayMs);
+      requireOwner();
+      const count = req.count ?? 1;
+      const allowance = req.allowance ?? (req.kind === "guest" ? 3 : null);
+      if (!Number.isInteger(count) || count < 1 || count > 50 || allowance === null) throw new ApiFailure(400, "bad_request");
+      const block = () => Math.random().toString(36).slice(2, 6).toUpperCase();
+      const codes = Array.from({ length: count }, () => `SAGE-${block()}-${block()}`);
+      const createdAt = new Date().toISOString().replace("T", " ").slice(0, 19);
+      for (const code of codes) {
+        mockCodes.unshift({ code, kind: req.kind, allowance, used: 0, contact: null, hasVoice: false, note: req.note ?? null, createdAt, lastUsedAt: null });
+      }
+      return { codes };
     },
   };
 }

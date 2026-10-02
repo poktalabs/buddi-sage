@@ -8,7 +8,7 @@ import type { Env, Session } from "./env";
 import { error } from "./http";
 import { readSession } from "./session";
 import { logout, me, redeem } from "./routes/access";
-import { createCodes } from "./routes/admin";
+import { createCodes, dashboard, dashboardCreateCodes } from "./routes/admin";
 import { addVoice, deleteVoice } from "./routes/voice";
 import { startRound } from "./routes/rounds";
 import { chatCompletions } from "./routes/llm";
@@ -33,6 +33,9 @@ const ROUTES: Route[] = [
   { method: "POST", pattern: /^\/api\/logout$/, auth: "none", handler: logout },
   { method: "GET", pattern: /^\/api\/me$/, auth: "session", handler: me },
   { method: "POST", pattern: /^\/admin\/codes$/, auth: "none", handler: createCodes },
+  // The owner dashboard: a Session route; the handler answers 403 unless the code is an owner code.
+  { method: "GET", pattern: /^\/api\/dashboard$/, auth: "session", handler: dashboard },
+  { method: "POST", pattern: /^\/api\/dashboard\/codes$/, auth: "session", handler: dashboardCreateCodes },
   { method: "POST", pattern: /^\/api\/requests$/, auth: "none", handler: (r, e) => createCodeRequest(r, e) },
   { method: "POST", pattern: /^\/telegram\/webhook$/, auth: "none", handler: telegramWebhook },
   { method: "POST", pattern: /^\/api\/voice$/, auth: "session", handler: addVoice },

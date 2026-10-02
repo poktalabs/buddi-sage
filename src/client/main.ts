@@ -1,5 +1,6 @@
 // The Sage Mode page: one screen at a time, in the order a Guest meets them.
 // Landing (code + Contact, or request a code), Target job, Consent, Voice sample, Question picker, Round, Replay, Next question.
+// An owner code also gets the Dashboard (/dashboard): every code, and a form to issue more.
 // Decisions encoded here:
 // - Consent comes before any recording, every time a Guest has no Voice clone. Consent
 //   is not stored anywhere, so a Guest who deletes their voice sees it again.
@@ -14,10 +15,11 @@
 // - Vanilla TypeScript and the BUDDi tokens (style.css); no framework, no dependency.
 import consentMd from "../../content/consent.md?raw";
 import readingScriptMd from "../../content/reading-script.md?raw";
-import type { JobBrief, Lang, Me, ReplayResponse, StartRoundResponse } from "../shared/api";
+import type { DashboardResponse, JobBrief, Lang, Me, ReplayResponse, StartRoundResponse } from "../shared/api";
 import { QUESTIONS, type Question } from "../shared/questions";
 import { ApiFailure, httpApi, type ClientApi } from "./api";
 import { failureMessage } from "./copy";
+import { FILTERS, formatTime, inviteLink, isRedeemed, matchesFilter, summarise, type CodeFilter } from "./dashboard";
 import { initialLang, LANDING, LANG_KEY, landingFailure, MEL_PROFILES, SOCIAL_ICONS } from "./landing";
 import { renderMarkdown } from "./markdown";
 import { ensureMicrophone } from "./microphone";
@@ -30,6 +32,7 @@ const MIN_SAMPLE_SECONDS = 60;
 const JOB_SKIP_KEY = "buddi-sage:job-skipped";
 const BUDDI_URL = "https://buddi.agentcamp.xyz/";
 const MAX_SAMPLE_SECONDS = 180;
+const DASHBOARD_PATH = "/dashboard";
 
 // ---------- tiny DOM helper ----------
 
@@ -75,6 +78,9 @@ let roundLive = false;
 let teardown: (() => void)[] = [];
 let activeRound: AbortController | null = null;
 let landingMode: "request" | "have" = "request";
+let codeFilter: CodeFilter = "all";
+// Read once at load: mount() rewrites the address for every screen, the loading one included.
+let openDashboard = location.pathname === DASHBOARD_PATH;
 let lang: Lang = initialLang(localStorage.getItem(LANG_KEY), navigator.languages ?? [navigator.language]);
 
 const header = document.getElementById("header")!;
@@ -85,6 +91,10 @@ function mount(...nodes: Node[]) {
   main.replaceChildren(...nodes);
   // The landing page runs wider than the app screens, header included, so the logo lines up with the hero.
   document.body.classList.toggle("is-landing", main.querySelector(".landing") !== null);
+  document.body.classList.toggle("is-dashboard", main.querySelector(".dashboard") !== null);
+  // Only the Dashboard has its own address; every other screen lives at /.
+  const path = main.querySelector(".dashboard") ? DASHBOARD_PATH : "/";
+  if (location.pathname !== path) history.replaceState(null, "", path + location.search);
   renderHeader();
   main.querySelector<HTMLElement>("h1, h2")?.focus({ preventScroll: true });
   window.scrollTo(0, 0);
@@ -96,6 +106,16 @@ function roundsLeft(): number {
 
 function renderHeader() {
   const right: Node[] = [];
+  if (me?.kind === "owner") {
+    const onDashboard = main.querySelector(".dashboard") !== null;
+    right.push(
+      h(
+        "button",
+        { class: "ds-btn ds-btn-ghost", disabled: roundLive, title: roundLive ? "Available after this Round" : undefined, onClick: () => (onDashboard ? route() : void showDashboard()) },
+        onDashboard ? "Practice" : "Dashboard",
+      ),
+    );
+  }
   if (me) right.push(h("span", { class: "ds-badge" }, `Rounds left: ${roundsLeft()}`));
   if (me?.hasVoice) right.push(deleteVoiceControl());
   if (me) {
@@ -240,8 +260,13 @@ function jobLabel(job: JobBrief): string {
   return job.company ? `${job.role} at ${job.company}` : job.role;
 }
 
+// The practice flow's next step. An owner code opened at /dashboard lands there first, after
+// a reload or after entering the code.
 function route() {
+  const dashboardFirst = openDashboard && me?.kind === "owner";
+  if (me) openDashboard = false;
   if (!me) showLanding();
+  else if (dashboardFirst) void showDashboard();
   else if (!me.job && !jobSkipped()) showJob();
   else if (!me.hasVoice) showConsent();
   else showPicker();
@@ -906,6 +931,178 @@ function buddiHandoff(): HTMLElement {
     ),
     copied,
   );
+}
+
+// ---------- owner dashboard ----------
+
+// Every code, newest first, and a form that issues Guest or Gift codes with the same limits as
+// the Telegram bot. The Worker answers 403 for any other code, so the header button is only a
+// convenience, not the lock.
+async function showDashboard(created?: string[]) {
+  showLoading("Loading codes...");
+  let data: DashboardResponse;
+  try {
+    data = await api.dashboard();
+  } catch (e) {
+    showError(codeOf(e), () => void showDashboard());
+    return;
+  }
+
+  const sum = summarise(data.codes);
+  const roundsBy = new Map(data.rounds.map((r) => [r.status, r.n]));
+  const stats = h(
+    "div",
+    { class: "row stats" },
+    h("span", { class: "ds-badge" }, `Codes given: ${sum.codes}`),
+    h("span", { class: "ds-badge ds-badge-gold" }, `Not started: ${sum.unused}`),
+    h("span", { class: "ds-badge" }, `Rounds used: ${sum.roundsUsed} of ${sum.roundsIssued}`),
+    h("span", { class: "ds-badge ds-badge-success" }, `Replays: ${(roundsBy.get("replayed") ?? 0) + (roundsBy.get("fallback") ?? 0)}`),
+    roundsBy.get("failed") ? h("span", { class: "ds-badge" }, `Failed Rounds: ${roundsBy.get("failed")}`) : "",
+    data.pendingRequests ? h("span", { class: "ds-badge ds-badge-info" }, `Pending requests: ${data.pendingRequests}`) : "",
+  );
+
+  const list = h("tbody");
+  const count = h("p", { class: "muted small", role: "status" });
+  const renderRows = () => {
+    const rows = data.codes.filter((c) => matchesFilter(c, codeFilter));
+    count.textContent = `${rows.length} of ${data.codes.length} codes`;
+    list.replaceChildren(
+      ...rows.map((c) =>
+        h(
+          "tr",
+          { class: created?.includes(c.code) ? "is-new" : undefined },
+          h("td", {}, h("div", { class: "code-cell" }, h("code", {}, c.code), copyButton(inviteLink(location.origin, c.code), "Copy link"))),
+          h("td", {}, h("span", { class: `ds-badge${c.kind === "owner" ? " ds-badge-violet" : c.kind === "gift" ? " ds-badge-gold" : ""}` }, c.kind)),
+          h("td", {}, `${c.used} / ${c.allowance}`),
+          h("td", {}, c.hasVoice ? "Yes" : isRedeemed(c) ? "Deleted" : "No"),
+          h("td", {}, c.contact ?? ""),
+          h("td", { class: "note-cell" }, c.note ?? ""),
+          h("td", { class: "time-cell" }, formatTime(c.createdAt)),
+          h("td", { class: "time-cell" }, formatTime(c.lastUsedAt)),
+        ),
+      ),
+    );
+  };
+  const filter = h(
+    "select",
+    {
+      id: "code-filter",
+      class: "ds-input filter",
+      onChange: (ev: Event) => {
+        codeFilter = (ev.target as HTMLSelectElement).value as CodeFilter;
+        renderRows();
+      },
+    },
+    ...FILTERS.map((f) => h("option", { value: f.value, selected: f.value === codeFilter }, f.label)),
+  );
+  renderRows();
+
+  mount(
+    h(
+      "div",
+      { class: "dashboard stack" },
+      panel(
+        ...title("Owner", "Dashboard"),
+        stats,
+        h("p", { class: "muted small" }, "Not started means no Round and no Voice clone yet. It does not tell you whether you already sent the code to someone: use the note for that."),
+      ),
+      issueForm(created),
+      panel(
+        h("div", { class: "row table-head" }, h("h2", {}, "Codes"), h("label", { class: "row", for: "code-filter" }, "Show", filter)),
+        count,
+        h(
+          "div",
+          { class: "table-wrap" },
+          h(
+            "table",
+            { class: "codes" },
+            h("thead", {}, h("tr", {}, ...["Code", "Kind", "Rounds", "Voice", "Contact", "Note", "Created", "Last Round"].map((t) => h("th", { scope: "col" }, t)))),
+            list,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+function issueForm(created?: string[]): HTMLElement {
+  const kind = h(
+    "select",
+    { id: "issue-kind", class: "ds-input" },
+    h("option", { value: "guest" }, "Guest (3 Rounds each)"),
+    h("option", { value: "gift" }, "Gift (you pick the Rounds)"),
+  );
+  const count = h("input", { id: "issue-count", class: "ds-input", type: "number", min: 1, max: 50, value: "1", required: true });
+  const rounds = h("input", { id: "issue-rounds", class: "ds-input", type: "number", min: 1, max: 1000, placeholder: "3" });
+  const note = h("input", { id: "issue-note", class: "ds-input", maxLength: 500, placeholder: "Who it is for, e.g. recruiter demo" });
+  const err = h("p", { class: "ds-note ds-note-error", role: "alert", hidden: true });
+  const submit = h("button", { class: "ds-btn ds-btn-primary", type: "submit" }, "Create codes");
+  const syncKind = () => {
+    rounds.required = kind.value === "gift";
+    rounds.placeholder = kind.value === "gift" ? "Required" : "3";
+  };
+  kind.addEventListener("change", syncKind);
+
+  const form = h(
+    "form",
+    {
+      class: "stack",
+      onSubmit: async (ev: Event) => {
+        ev.preventDefault();
+        submit.disabled = true;
+        err.hidden = true;
+        try {
+          const res = await api.createCodes({
+            kind: kind.value as "guest" | "gift",
+            count: Number(count.value),
+            allowance: rounds.value ? Number(rounds.value) : undefined,
+            note: note.value.trim() || undefined,
+          });
+          await showDashboard(res.codes);
+        } catch (e) {
+          err.textContent = failureMessage(codeOf(e));
+          err.hidden = false;
+          submit.disabled = false;
+        }
+      },
+    },
+    h(
+      "div",
+      { class: "issue-grid" },
+      h("div", { class: "field" }, h("label", { for: "issue-kind" }, "Kind"), kind),
+      h("div", { class: "field" }, h("label", { for: "issue-count" }, "How many"), count),
+      h("div", { class: "field" }, h("label", { for: "issue-rounds" }, "Rounds each"), rounds),
+      h("div", { class: "field note-field" }, h("label", { for: "issue-note" }, "Note"), note),
+    ),
+    err,
+    submit,
+  );
+
+  const fresh = created?.length
+    ? h(
+        "div",
+        { class: "inset nb-sm fresh" },
+        h("p", { class: "kicker" }, created.length === 1 ? "New code" : `${created.length} new codes`),
+        h("ul", { class: "fresh-list" }, ...created.map((c) => h("li", {}, h("code", {}, c), copyButton(inviteLink(location.origin, c), "Copy link")))),
+        created.length > 1 ? copyButton(created.map((c) => inviteLink(location.origin, c)).join("\n"), "Copy all links") : "",
+      )
+    : "";
+
+  return panel(h("h2", { class: "panel-title" }, "Issue codes"), fresh, form);
+}
+
+function copyButton(text: string, label: string): HTMLButtonElement {
+  const btn = h("button", { class: "ds-btn ds-btn-ghost copy-btn", type: "button" }, label);
+  btn.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      btn.textContent = "Copied";
+    } catch {
+      btn.textContent = "Copy failed";
+    }
+    setTimeout(() => (btn.textContent = label), 1500);
+  });
+  return btn;
 }
 
 // ---------- start ----------
