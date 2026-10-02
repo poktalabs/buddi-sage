@@ -7,6 +7,9 @@ import type {
   ApiError,
   CodeRequestBody,
   CodeRequestResponse,
+  AdminCreateCodesResponse,
+  DashboardCreateCodesRequest,
+  DashboardResponse,
   Me,
   RedeemRequest,
   ReplayRequest,
@@ -45,6 +48,10 @@ export interface ClientApi {
   fetchAudio(url: string): Promise<Blob>;
   /** Landing page: asks Mel for a code. */
   requestCode(req: CodeRequestBody): Promise<CodeRequestResponse>;
+  /** Owner dashboard: every code. 403 forbidden for a Guest or Gift Session. */
+  dashboard(): Promise<DashboardResponse>;
+  /** Owner dashboard: issues Guest or Gift codes. */
+  createCodes(req: DashboardCreateCodesRequest): Promise<AdminCreateCodesResponse>;
 }
 
 type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
@@ -104,5 +111,7 @@ export function httpApi(fetchImpl: FetchLike = (i, init) => fetch(i, init)): Cli
     replay: (roundId, req) => json<ReplayResponse>(`/api/rounds/${encodeURIComponent(roundId)}/replay`, post(req)),
     fetchAudio: async (url) => (await send(url)).blob(),
     requestCode: (req) => json<CodeRequestResponse>("/api/requests", post(req)),
+    dashboard: () => json<DashboardResponse>("/api/dashboard"),
+    createCodes: (req) => json<AdminCreateCodesResponse>("/api/dashboard/codes", post(req)),
   };
 }

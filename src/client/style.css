@@ -292,3 +292,25 @@ html:has(.cta-dialog[open]) { overflow: hidden; }
 /* A closing hint under a form or list needs air above it. */
 .ds-card > p.small:last-child { margin-top: 16px; margin-bottom: 0; }
 a.ds-btn { text-decoration: none; }
+
+/* Owner dashboard: a wider column for the codes table, which scrolls sideways on a phone. */
+.is-dashboard .column { max-width: 72rem; }
+.dashboard h2.panel-title, .table-head h2 { margin: 0; }
+.dashboard .stats { margin: 0 0 12px; gap: 8px; }
+.table-head { justify-content: space-between; margin: 0 0 8px; }
+.filter { width: auto; }
+.issue-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+@media (min-width: 720px) { .issue-grid { grid-template-columns: 14rem 7rem 7rem 1fr; } }
+.fresh { margin: 12px 0 16px; }
+.fresh-list { list-style: none; padding: 0; margin: 0 0 12px; display: flex; flex-direction: column; gap: 8px; }
+.fresh-list li, .code-cell { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.copy-btn { padding: 2px 8px; font-size: 0.7rem; box-shadow: 2px 2px 0 0 var(--color-ink); }
+.table-wrap { overflow-x: auto; border: 2px solid var(--color-ink); border-radius: 6px; }
+table.codes { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+.codes th, .codes td { padding: 8px 10px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--color-paper-dark); }
+.codes thead th { background: var(--color-paper-dark); font-weight: 800; white-space: nowrap; }
+.codes tbody tr:last-child td { border-bottom: 0; }
+.codes tr.is-new td { background: var(--color-paper); }
+.codes code, .fresh-list code { font-weight: 800; white-space: nowrap; }
+.time-cell { white-space: nowrap; color: var(--color-charcoal); }
+.note-cell { min-width: 10rem; }

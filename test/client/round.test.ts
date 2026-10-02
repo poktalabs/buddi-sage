@@ -23,6 +23,8 @@ function fakeApi(overrides: Partial<ClientApi> = {}) {
     replay: vi.fn(async () => REPLAY),
     fetchAudio: vi.fn(),
     requestCode: vi.fn(),
+    dashboard: vi.fn(),
+    createCodes: vi.fn(),
     setJob: vi.fn(),
     ...overrides,
   };

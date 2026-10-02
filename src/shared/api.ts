@@ -58,6 +58,26 @@ export type AdminCreateCodesRequest = {
 };
 export type AdminCreateCodesResponse = { codes: string[] };
 
+// The owner dashboard (/dashboard): an owner code's Session reads every code and issues Guest
+// or Gift codes, the same limits as /admin/codes. Never owner codes from a Session.
+export type DashboardCode = {
+  code: string;
+  kind: CodeKind;
+  allowance: number;
+  used: number;
+  contact: string | null;
+  hasVoice: boolean;
+  note: string | null;
+  createdAt: string;
+  lastUsedAt: string | null;
+};
+export type DashboardResponse = {
+  codes: DashboardCode[];
+  rounds: { status: string; n: number }[];
+  pendingRequests: number;
+};
+export type DashboardCreateCodesRequest = { kind: "guest" | "gift"; count?: number; allowance?: number; note?: string };
+
 // Landing page "Request a code" form: the social handle the requester will DM Mel from, and
 // optionally the job they are preparing for (a link or a title). `website` is a honeypot.
 export type Lang = "en" | "es";

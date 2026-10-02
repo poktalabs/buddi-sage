@@ -4,6 +4,7 @@ import type { ApiError } from "../shared/api";
 
 export type ErrorCode =
   | "unauthorized"
+  | "forbidden"
   | "bad_request"
   | "invalid_code"
   | "contact_required"
