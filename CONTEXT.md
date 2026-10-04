@@ -1,14 +1,21 @@
-# BUDDi Sage Mode
+# Buddi Sage Mode
 
-Sage Mode is a BUDDi interview-practice experience: a voice coach helps you answer a hard interview question, then you hear your own answer the way your best self would say it, in your own voice.
+Sage Mode is a Buddi interview-practice experience: a voice coach helps you answer a hard interview question, then you hear your own answer the way your best self would say it, in your own voice. Sage Mode is your best self, in harmony: perfectly balanced, ready for the job.
+
+The brand is written "Buddi" (2026-10-02).
+_Avoid_: BUDDi, BUDDI
 
 ## Language
 
 ### People and voices
 
 **Sage**:
-The voice coach the user talks to during a Session. Sage always speaks in its own neutral voice, never in the user's voice.
+The mentor and voice coach the user talks to during a Session: teaches and challenges. Sage always speaks in its own neutral voice, never in the user's voice.
 _Avoid_: agent (in user-facing copy), coach bot, avatar
+
+**Buddi (the frog)**:
+The Buddi mascot, a frog named Buddi: your buddy, on your side through the Round. Never Sage, and never speaks for Sage. Shares its name with the brand; say "Buddi the frog" where the two could be confused.
+_Avoid_: toad, the mascot (as a name), Sage's pet
 
 **Voice clone**:
 A copy of the user's own voice, made from a Voice sample given with explicit Consent. Used only for the Replay. Kept until the user deletes it.
@@ -60,7 +67,7 @@ The single, specific challenge Sage makes after the user's first Answer to a Que
 _Avoid_: feedback, critique
 
 **Hesitation signals**:
-Measurable signs of an unsure delivery in the user's final Answer: filler words, long pauses and pace. Shown beside the Replay.
+Measurable signs of an unsure delivery in the user's final Answer: filler words, long pauses and pace. Planned beside the Replay; not shown yet.
 _Avoid_: confidence score, fluency score
 
 ### Access
