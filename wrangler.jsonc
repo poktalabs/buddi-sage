@@ -16,9 +16,8 @@
     "COACH_MODEL": "deepseek-ai/DeepSeek-V4-Pro-0813",
     "REWRITE_MODEL": "MiniMaxAI/MiniMax-M3",
     "JOB_MODEL": "deepseek-ai/DeepSeek-V4-Pro-0813",
-    "TTS_MODEL": "eleven_v4",
-    "AGENT_ID": "<agent-id>"
+    "TTS_MODEL": "eleven_v4"
   }
-  // Secrets (wrangler secret put / .dev.vars): ELEVENLABS_API_KEY, NEBIUS_API_KEY, LLM_PROXY_SECRET, SESSION_SECRET, ADMIN_SECRET;
+  // Secrets (wrangler secret put / .dev.vars): AGENT_ID (kept out of the public repo), ELEVENLABS_API_KEY, NEBIUS_API_KEY, LLM_PROXY_SECRET, SESSION_SECRET, ADMIN_SECRET;
   // optional Telegram admin bot: TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, TELEGRAM_OWNER_ID
 }
